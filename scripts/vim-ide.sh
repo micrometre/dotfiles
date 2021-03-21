@@ -22,9 +22,5 @@ wget https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.tmux.co
 wget https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.tern-project
 wget https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.inputrc
 wget https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.bash_aliases
-
-
-
-
 #install plugins
 vim +'PlugInstall --sync' +qa    

@@ -38,10 +38,3 @@ docker rmi -f $(docker images -q)
 docker volume prune
 docker network prune
 }
-mark_down ()
-{
-python3 -m venv edit-venv
-source edit-venv/bin/activate
-pip install grip
-}
-
