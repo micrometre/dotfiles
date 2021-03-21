@@ -4,7 +4,7 @@ alias sshkey='cat ~/.ssh/id_rsa.pub'
 alias speed-test='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
 #git commit/push 
 #pass your 3 arguments like this example! bash git-commit.sh finished updatig configs
-commit-repo ()
+commit_repo ()
 {
 commit_message1="$1"
 commit_message2="$2"
@@ -16,7 +16,7 @@ git commit -m "$commit_message1 $commit_message2 $commit_message3 $commit_messag
 git push
 }
 #reset commit history
-commit-reset()
+commit_reset()
 {
 commit_message1="$1"
 commit_message2="$2"
@@ -32,15 +32,16 @@ git push -f origin master
 git push --set-upstream origin master
 }
 #delete clear docker images, volumes and containers
-docker-nuke () {
+docker_nuke () {
 docker rm -f $(docker ps -a -q)
 docker rmi -f $(docker images -q)
 docker volume prune
 docker network prune
 }
-mark-down ()
+mark_down ()
 {
-python3 -m venv env
-source env/bin/activate
+python3 -m venv edit-venv
+source edit-venv/bin/activate
+pip install grip
 }
 
