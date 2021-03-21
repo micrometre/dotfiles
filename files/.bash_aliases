@@ -38,11 +38,9 @@ docker rmi -f $(docker images -q)
 docker volume prune
 docker network prune
 }
-#python vertual env
-vpy_env ()
+mark-down ()
 {
-venv_folder="$1"
-python3 -m venv $1
-source "$1"/bin/activate
+python3 -m venv env
+source env/bin/activate
 }
 
