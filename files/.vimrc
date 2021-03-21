@@ -49,23 +49,13 @@ endif
 
 "vim-airline confs
 let g:airline#extensions#tabline#enabled = 1
-"Latex configs
-let g:gitgutter_terminal_reports_focus=0
-let g:livepreview_previewer = 'vprerex'
-"mark up preview
-" the port on which Livedown server will run
-let g:livedown_port = 1337
-" the browser to use, can also be firefox, chrome or other, depending on your executable
-let g:livedown_browser = "chrome"
 call plug#begin()
+Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'scrooloose/syntastic'
-Plug 'iamcco/mathjax-support-for-mkdp'
-Plug 'iamcco/markdown-preview.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'lervag/vimtex'
-Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
 Plug 'prettier/vim-prettier', {
   \ 'do': 'npm install',
   \ 'branch': 'release/1.x',
