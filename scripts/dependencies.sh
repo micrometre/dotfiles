@@ -5,6 +5,7 @@ sudo apt upgrade -y && \
 sudo apt install -y \
 git \
 grip \
+vprerex \
 build-essential \
 make \
 software-properties-common \
