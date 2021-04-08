@@ -47,13 +47,7 @@ if has("autocmd")
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
 
-
-" the port on which Livedown server will run
-let g:livedown_port = 1337
-
-" the browser to use, can also be firefox, chrome or other, depending on your executable
-let g:livedown_browser = "chrome"
-
+let g:livepreview_previewer = 'vprerex'
 
 
 "vim-airline confs
