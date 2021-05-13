@@ -17,6 +17,7 @@ tmux \
 apt-transport-https \
 ca-certificates \
 aptitude \
+python-dev
 python3 \
 python3-pip \
 python3-venv \
@@ -29,6 +30,12 @@ texlive-base \
 texlive-latex-base \
 texlive-latex-extra \
 vim-gtk \
-texmaker 
+texmaker \
+libssl-dev \ 
+libffi-dev 
+
+
+
+
 #vim-gtk # temp solution for enable +python feature in vim
 sudo apt autoremove -y
