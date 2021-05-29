@@ -16,6 +16,16 @@ ca-certificates \
 aptitude \
 python3-pip \
 python3-dev \
-wget 
-sudo -H pip3 install --upgrade pip
-sudo -H pip3 install virtualenv
+vim \
+grip \
+vprerex \
+latexmk \
+texlive-lang-english \
+texlive-base \
+texlive-latex-base \
+texlive-latex-extra \
+texmaker \
+libssl-dev \
+libffi-dev
+#sudo -H pip3 install --upgrade pip
+#sudo -H pip3 install virtualenv
