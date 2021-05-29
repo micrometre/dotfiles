@@ -1,41 +1,21 @@
 #!/bin/bash
 #install dependencies
-export DEBIAN_FRONTEND=noninteractive
-sudo apt upgrade -y && \
-sudo apt install -y \
+sudo apt-get update && DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y \
+build-essential \
+curl \
 git \
 build-essential \
 make \
 software-properties-common \
 unzip \
-curl \
-wget \
-openssh-server \
 bash-completion \
 openssh-server \
 tmux \
 apt-transport-https \
 ca-certificates \
 aptitude \
-python-dev
-python3 \
 python3-pip \
-python3-venv \
-vim \
-grip \
-vprerex \
-latexmk \
-texlive-lang-english \
-texlive-base \
-texlive-latex-base \
-texlive-latex-extra \
-vim-gtk \
-texmaker \
-libssl-dev \ 
-libffi-dev 
-
-
-
-
-#vim-gtk # temp solution for enable +python feature in vim
-sudo apt autoremove -y
+python3-dev \
+wget 
+sudo -H pip3 install --upgrade pip
+sudo -H pip3 install virtualenv
