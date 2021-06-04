@@ -51,16 +51,16 @@ let g:livepreview_previewer = 'vprerex'
 
 
 "vim-airline confs
+let g:livepreview_engine = 'xelatex' . ' [options]'
+
 let g:airline#extensions#tabline#enabled = 1
 call plug#begin()
 Plug 'lervag/vimtex'
 Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
-Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'scrooloose/syntastic'
 Plug 'airblade/vim-gitgutter'
-Plug 'lervag/vimtex'
 Plug 'prettier/vim-prettier', {
   \ 'do': 'npm install',
   \ 'branch': 'release/1.x',
