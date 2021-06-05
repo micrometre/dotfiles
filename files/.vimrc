@@ -47,11 +47,12 @@ if has("autocmd")
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
 
+"vim latex
 let g:livepreview_previewer = 'vprerex'
+let g:livepreview_engine = 'xelatex'
 
 
 "vim-airline confs
-let g:livepreview_engine = 'xelatex' . ' [options]'
 
 let g:airline#extensions#tabline#enabled = 1
 call plug#begin()
