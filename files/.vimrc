@@ -56,6 +56,7 @@ let g:livepreview_engine = 'xelatex'
 
 let g:airline#extensions#tabline#enabled = 1
 call plug#begin()
+Plug 'editorconfig/editorconfig-vim'
 Plug 'lervag/vimtex'
 Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
 Plug 'vim-airline/vim-airline'
