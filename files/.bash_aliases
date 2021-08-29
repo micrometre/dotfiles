@@ -6,7 +6,8 @@ alias mkd-preview='npx markdown-preview'
 
 #Command line interface for testing internet bandwidth using speedtest.net
 alias speed-test='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
-#git commit/push 
+#git commit/push
+
 #pass your 3 arguments like this example! bash git-commit.sh finished updatig configs
 commit_repo ()
 {
@@ -19,6 +20,7 @@ git add . -A
 git commit -m "$commit_message1 $commit_message2 $commit_message3 $commit_message4 $commit_message5"
 git push
 }
+
 #reset commit history
 commit_reset()
 {
@@ -35,6 +37,7 @@ git branch -m master
 git push -f origin master
 git push --set-upstream origin master
 }
+
 #delete clear docker images, volumes and containers
 docker_nuke () {
 docker rm -f $(docker ps -a -q)
