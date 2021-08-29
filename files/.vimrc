@@ -53,9 +53,15 @@ let g:livepreview_engine = 'xelatex'
 
 
 "vim-airline confs
-
 let g:airline#extensions#tabline#enabled = 1
+
+"remap the default emmet leader:
+
+let g:user_emmet_leader_key='<C-Z>'
+
+
 call plug#begin()
+Plug 'mattn/emmet-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'lervag/vimtex'
 Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
