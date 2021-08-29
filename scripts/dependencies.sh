@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xv
 #install dependencies
 sudo apt-get update && DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y \
 build-essential \
@@ -17,7 +17,7 @@ aptitude \
 python3-pip \
 python3-dev \
 vim \
-grip \
+vim-gtk \
 vprerex \
 latexmk \
 texlive-lang-english \
@@ -27,5 +27,3 @@ texlive-latex-extra \
 texmaker \
 libssl-dev \
 libffi-dev
-#sudo -H pip3 install --upgrade pip
-#sudo -H pip3 install virtualenv

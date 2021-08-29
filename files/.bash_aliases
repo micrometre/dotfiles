@@ -1,5 +1,9 @@
 #display ssh public key
 alias sshkey='cat ~/.ssh/id_rsa.pub'
+
+#Markdown preview with live update.
+alias mkd-preview='npx markdown-preview'
+
 #Command line interface for testing internet bandwidth using speedtest.net
 alias speed-test='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
 #git commit/push 
