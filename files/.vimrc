@@ -57,7 +57,7 @@ let g:airline#extensions#tabline#enabled = 1
 
 "remap the default emmet leader:
 
-let g:user_emmet_leader_key='<C-Z>'
+let g:user_emmet_leader_key=','
 
 
 call plug#begin()
