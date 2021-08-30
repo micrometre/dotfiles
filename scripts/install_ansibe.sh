@@ -1,5 +1,5 @@
-#!/bin/bash
-sudo apt update
-sudo apt install software-properties-common -y
-sudo apt-add-repository --yes --update ppa:ansible/ansible -y
-sudo apt install ansible -y
+#!/bin/bash -xv
+echo 'deb http://deb.debian.org/debian buster-backports main' | sudo tee  -a /etc/apt/sources.list > /dev/null
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+sudo apt-get update && DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y \
+ansible

@@ -1,31 +1,30 @@
-## Config files and scripts for Debian linux Distros
+## Config files and scripts Debian linux Distros
 
-**Config files**: 
--  bash_aliases
--  A HTTP/1.1 benchmarking tool written in node, 
--  serve static html localhost
--  Markdown preview with live update.
--  Command line interface for testing internet bandwidth using speedtest.net
--  display ssh public key
--  pass your 3 arguments like this example! bash git-commit.sh finished updatig configs
+#### bash_aliases functions
+ 
+-  HTTP/1.1 benchmarking 
+-  Serve html files 
+-  Localhost Markdown preview with live update.
+-  Internet bandwidth using speedtest.net
 
+#### vimrc shortcuts & plugins
 
+-  emmet-vim
+-  editorconfig-vim
+-  vimtex
+-  vim-latex-live-preview
+-  vim-airline
+-  vim-airline-themes
+-  syntastic
+-  vim-gitgutter
 
-
-
--  vimrc
-let g:livepreview_previewer = 'vprerex'
-let g:livepreview_engine = 'xelatex'
-"vim-airline confs
-"remap the default emmet leader:
-
-
--  tmux.conf
--  inputrc
--  tern-project
--  editorconfig
--  prettierignore
--  prettierrc
+##### misc
+$  tmux.conf
+$  inputrc
+$  tern-project
+$  editorconfig
+$  prettierignore
+$  prettierrc
 
 
 
