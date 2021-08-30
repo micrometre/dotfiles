@@ -1,5 +1,8 @@
-#display ssh public key
-alias sshkey='cat ~/.ssh/id_rsa.pub'
+#A HTTP/1.1 benchmarking tool written in node, 
+alias bench_http='npx autocannon'
+
+#serve static html localhost
+alias serve='npx serve'
 
 #Markdown preview with live update.
 alias mkd-preview='npx markdown-preview'
@@ -7,6 +10,9 @@ alias mkd-preview='npx markdown-preview'
 #Command line interface for testing internet bandwidth using speedtest.net
 alias speed-test='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
 #git commit/push
+
+#display ssh public key
+alias sshkey='cat ~/.ssh/id_rsa.pub'
 
 #pass your 3 arguments like this example! bash git-commit.sh finished updatig configs
 commit_repo ()

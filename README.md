@@ -1,11 +1,26 @@
 ## Config files and scripts for Debian linux Distros
 
-
-
 **Config files**: 
--  vimrc
--  tmux.conf
 -  bash_aliases
+-  A HTTP/1.1 benchmarking tool written in node, 
+-  serve static html localhost
+-  Markdown preview with live update.
+-  Command line interface for testing internet bandwidth using speedtest.net
+-  display ssh public key
+-  pass your 3 arguments like this example! bash git-commit.sh finished updatig configs
+
+
+
+
+
+-  vimrc
+let g:livepreview_previewer = 'vprerex'
+let g:livepreview_engine = 'xelatex'
+"vim-airline confs
+"remap the default emmet leader:
+
+
+-  tmux.conf
 -  inputrc
 -  tern-project
 -  editorconfig
