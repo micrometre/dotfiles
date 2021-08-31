@@ -36,7 +36,7 @@ vnoremap < <gv
 "completions
    inoremap ( ()<Esc>i
    inoremap [ []<Esc>i
-"   inoremap " ""<Esc>i
+   inoremap " ""<Esc>i
    inoremap ' ''<Esc>i
    inoremap { {}<Esc>i
 
@@ -51,16 +51,12 @@ endif
 let g:livepreview_previewer = 'vprerex'
 let g:livepreview_engine = 'xelatex'
 
-
 "vim-airline confs
 let g:airline#extensions#tabline#enabled = 1
 
 "remap the default emmet leader:
-
 let g:user_emmet_leader_key=','
 
-let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.ejs PrettierAsync
 call plug#begin()
 Plug 'mattn/emmet-vim'
 Plug 'editorconfig/editorconfig-vim'
