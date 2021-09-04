@@ -24,6 +24,7 @@ texlive-lang-english \
 texlive-base \
 texlive-latex-base \
 texlive-latex-extra \
+texlive-xetex \
 texmaker \
 libssl-dev \
 libffi-dev
