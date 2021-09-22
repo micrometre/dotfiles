@@ -19,6 +19,7 @@ python3-dev \
 vim \
 vim-gtk \
 vprerex \
+evince \
 latexmk \
 texlive-lang-english \
 texlive-base \
