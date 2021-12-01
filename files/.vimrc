@@ -30,6 +30,10 @@ set incsearch		" Incremental search
 set autowrite		" Automatically save before commands like :next and :make
 set ruler
 set confirm
+
+
+
+
 "Shifting_blocks_visually
 vnoremap > >gv
 vnoremap < <gv
@@ -46,9 +50,10 @@ set pastetoggle=<F2>
 if has("autocmd")
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
+au BufNewFile,BufRead *.ejs set filetype=html
 
 "vim latex
-let g:livepreview_previewer = 'vprerex'
+let g:livepreview_previewer = 'evince'
 let g:livepreview_engine = 'xelatex'
 
 "vim-airline confs
@@ -59,6 +64,7 @@ let g:user_emmet_leader_key=','
 
 
 call plug#begin()
+Plug 'w0rp/ale'
 Plug 'mattn/emmet-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'lervag/vimtex'
@@ -72,5 +78,5 @@ Plug 'maxmellon/vim-jsx-pretty'
 Plug 'pangloss/vim-javascript'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
 let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.htmlPrettierAsync
 call plug#end()
