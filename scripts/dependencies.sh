@@ -18,14 +18,3 @@ python3-pip \
 python3-dev \
 vim \
 vim-gtk \
-vprerex \
-evince \
-latexmk \
-texlive-lang-english \
-texlive-base \
-texlive-latex-base \
-texlive-latex-extra \
-texlive-xetex \
-texmaker \
-libssl-dev \
-libffi-dev
