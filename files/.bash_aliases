@@ -1,4 +1,4 @@
-#A HTTP/1.1 benchmarking tool written in node, 
+#A HTTP/1.1 benchmarking tool written in node,
 alias bench_http='npx autocannon'
 
 #serve static html localhost
