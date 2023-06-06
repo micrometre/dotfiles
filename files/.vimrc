@@ -64,6 +64,8 @@ let g:user_emmet_leader_key=','
 
 
 call plug#begin()
+Plug 'preservim/nerdtree'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'w0rp/ale'
 Plug 'mattn/emmet-vim'
 Plug 'editorconfig/editorconfig-vim'
