@@ -10,7 +10,8 @@ liblog4cplus-dev \
 libopencv-dev \
 libtesseract-dev \
 wget \
-beanstalkd
+beanstalkd \
+tesseract-ocr
 # Clone the latest code from GitHub
 git clone https://github.com/openalpr/openalpr.git
 # Setup the build directory
