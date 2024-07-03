@@ -1,4 +1,0 @@
----
-vim_dir: "{{ ansible_env.HOME }}/.vim"
-vimrc: "{{ ansible_env.HOME }}/.vimrc"
-sys_packages: [ "vim"]

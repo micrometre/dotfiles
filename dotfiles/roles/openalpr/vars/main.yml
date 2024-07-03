@@ -1,3 +1,0 @@
----
-sys_packages: [ 'libcurl3-dev', 'libleptonica-dev', 'git',  "liblog4cplus-dev", "libopencv-dev", "libtesseract-dev", "tesseract-ocr", "beanstalkd", "cmake"]
-dir_name: repos  # aligned with github repo name

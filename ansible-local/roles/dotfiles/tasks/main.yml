@@ -1,7 +1,3 @@
-- name: get inputrc file 
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.inputrc
-    dest: /home/{{ansible_ssh_user}}
 
 - name: Install required packages
   package:
@@ -28,26 +24,7 @@
     dest: "{{ vim_dir }}/autoload/pathogen.vim"
     url: https://tpo.pe/pathogen.vim
 
-- name: Deploy plugins
-  git:
-    dest: "{{ vim_dir }}/bundle/{{ item.name }}"
-    repo: "{{ item.url }}"
-    clone: yes
-    update: yes
-    recursive: no
-  loop:
-  - name: vim-airline
-    url: https://github.com/vim-airline/vim-airline
-  - name: nerdtree
-    url: https://github.com/preservim/nerdtree
-  - name: fzf-vim
-    url: https://github.com/junegunn/fzf.vim
-  - name: vim-gitgutter
-    url: https://github.com/airblade/vim-gitgutter
-  - name: vim-fugitive
-    url: https://github.com/tpope/vim-fugitive
-  - name: vim-floaterm
-    url: https://github.com/voldikss/vim-floaterm
+
 
 - name: Ensure .vimrc config in place
   copy:
@@ -55,3 +32,17 @@
     dest: "{{ vimrc }}"
     backup: yes
     mode: 0640    
+
+- name: get inputrc file 
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.inputrc
+    dest: /home/{{ansible_ssh_user}}
+
+    
+- name: get bash_aliases file 
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.bash_aliases
+    dest: /home/{{ansible_ssh_user}}
+
+- name: write  git config
+  template: src=gitconfig.j2 dest=/home/{{ansible_ssh_user}}/.gitconfig
