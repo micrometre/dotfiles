@@ -1,0 +1,7 @@
+---
+copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+ansible_python_interpreter: /usr/bin/python3
+github_user: micrometre
+app_folder: ubnutu  # aligned with github repo name
+app_name: microanpr  # aligned with github repo name

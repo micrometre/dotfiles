@@ -1,0 +1,19 @@
+- name: playbook for localhost
+  hosts: local
+  remote_user: ubuntu
+  become: True
+  roles:
+    - common
+    - users
+    - docker
+    - openalpr
+  tags: setup
+
+- name: playbook for localhost
+  hosts: local
+  remote_user: ubuntu
+  become: False
+  roles:
+    # nodejs
+    - dotfiles
+  tags: setupNodejs

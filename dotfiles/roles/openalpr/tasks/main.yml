@@ -1,0 +1,14 @@
+- name: Update and upgarade System.
+  apt: name=aptitude update_cache=yes state=present force_apt_get=yes
+
+- name: Install required system packages
+  apt: name={{ sys_packages }} state=present
+
+- name: Run openalpr1 Installer
+  ansible.builtin.shell:
+    cmd: curl -sSf https://raw.githubusercontent.com/micrometre/dotfiles/master/scripts/openalpr_root-install.sh | sh -s -- -y
+
+- name: copy OpenALPR alprd config
+  template:
+    src: alprd.conf.j2
+    dest: /etc/openalpr/alprd.conf 
