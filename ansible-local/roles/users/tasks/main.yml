@@ -23,9 +23,7 @@
     - restart ssh
 
 
-  with_items: "{{ create_users }}"
-  notify:
-    - restart ssh
+
 
 - name: allow 'user dell' to have passwordless sudo
   lineinfile:
