@@ -24,3 +24,10 @@
   roles:
     - dotfiles
   tags: setupDotfiles
+
+- name: playbook for localhost
+  hosts: local
+  become: True
+  roles:
+    - pipx
+  tags: setupPipx

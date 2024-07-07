@@ -1,0 +1,23 @@
+- name: Update and upgarade System.
+  apt: name=aptitude update_cache=yes state=present force_apt_get=yes
+
+- name: Update apt.
+  apt: update_cache=yes force_apt_get=yes
+
+- name: Install required system packages
+  apt: name={{ sys_packages }} state=present
+
+- name: Install python3 packages
+  apt: name={{ python3_packages }} state=present
+
+- name: check is pipx installed
+  shell: command -v pipx
+  register: pipx_exists
+  ignore_errors: yes
+
+- name: pipx
+  when: pipx_exists is failed
+  pip:
+    name: pipx
+  tags:
+    - pipx  
