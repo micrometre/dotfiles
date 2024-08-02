@@ -3,9 +3,9 @@
   remote_user: ubuntu
   become: True
   roles:
-    # common
+    - common
     - users
-    # docker
+    - docker
     # openalpr
   tags: setup
 
