@@ -1,6 +1,6 @@
 .PHONY: run
 setup:
-	ansible-playbook main.yml --tags "setup"  
+	ansible-playbook main.yml --tags "setup"  -vvv
 setup_nodejs:
 	ansible-playbook main.yml --tags "setupNodejs"  
 

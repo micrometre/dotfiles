@@ -12,4 +12,3 @@
 
 - name: Install python3 packages
   apt: name={{ python3_packages }} state=present
-

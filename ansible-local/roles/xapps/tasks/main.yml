@@ -1,11 +1,6 @@
 - name: Update and upgarade System.
   apt: name=aptitude update_cache=yes state=present force_apt_get=yes
 
-- name: Upgrade all apt packages.
-  apt: upgrade=dist force_apt_get=yes
-
-- name: Install required system packages
-  apt: name={{ sys_packages }} state=present
-
-
-
+- name: Install a .deb package from the internet
+  ansible.builtin.apt:
+    deb: https://vscode.download.prss.microsoft.com/dbazure/download/stable/4849ca9bdf9666755eb463db297b69e5385090e3/code_1.93.0-1725459079_amd64.deb
