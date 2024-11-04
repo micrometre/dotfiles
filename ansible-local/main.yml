@@ -1,17 +1,17 @@
 - name: playbook for localhost
-  hosts: local
+  hosts: dell
   remote_user: ubuntu
   become: True
   roles:
-    # common
-    # users
-    # docker
+    - common
+    - users
+    - docker
     # openalpr
     - xapps
   tags: setup
 
 - name: playbook for localhost
-  hosts: local
+  hosts: dell
   remote_user: ubuntu
   become: False
   roles:
@@ -19,7 +19,7 @@
   tags: setupNodejs
 
 - name: playbook for localhost
-  hosts: local
+  hosts: dell
   remote_user: ubuntu
   become: False
   roles:
