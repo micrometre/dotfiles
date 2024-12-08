@@ -11,6 +11,9 @@ alias mkd-preview='npx markdown-preview'
 alias speed-test='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
 #git commit/push
 
+#get wpa key
+alias get_wpa='sudo grep -r '^psk=' /etc/NetworkManager/system-connections/'
+
 #display ssh public key
 alias sshkey='cat ~/.ssh/id_rsa.pub'
 
