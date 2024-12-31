@@ -1,5 +1,8 @@
 ## Config files and scripts Debian linux Distros
 
+#### ansible How to silence paramiko CryptographyDeprecationWarnings in ansible [duplicate]
+export PYTHONWARNINGS=ignore::UserWarning
+
 #### bash_aliases functions
  
 -  HTTP/1.1 benchmarking 
