@@ -1,4 +1,3 @@
 ---
-ansible_connection: "local" 
 ansible_user: "ubuntu" 
 #gather_facts: yes

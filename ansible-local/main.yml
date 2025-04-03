@@ -1,5 +1,5 @@
 - name: playbook for localhost
-  hosts: dell
+  hosts: ubuntu
   remote_user: ubuntu
   become: True
   roles:
@@ -11,7 +11,7 @@
   tags: setup
 
 - name: playbook for localhost
-  hosts: dell
+  hosts: ubuntu
   remote_user: ubuntu
   become: False
   roles:
@@ -19,7 +19,7 @@
   tags: setupNodejs
 
 - name: playbook for localhost
-  hosts: dell
+  hosts: ubuntu
   remote_user: ubuntu
   become: False
   roles:
