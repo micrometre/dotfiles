@@ -3,12 +3,6 @@
 #### ansible How to silence paramiko CryptographyDeprecationWarnings in ansible [duplicate]
 export PYTHONWARNINGS=ignore::UserWarning
 
-#### bash_aliases functions
- 
--  HTTP/1.1 benchmarking 
--  Serve html files 
--  Localhost Markdown preview with live update.
--  Internet bandwidth using speedtest.net
 
 #### vimrc shortcuts & plugins
 
