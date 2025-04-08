@@ -53,4 +53,7 @@ docker rm -f $(docker ps -a -q)
 docker rmi -f $(docker images -q)
 docker volume prune
 docker network prune
+docker volume ls -q | xargs -r docker volume rm -f
 }
+
+
