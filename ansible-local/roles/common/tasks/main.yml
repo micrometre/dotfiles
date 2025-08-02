@@ -12,3 +12,9 @@
 
 - name: Install python3 packages
   apt: name={{ python3_packages }} state=present
+
+- name: Upgrade python3 pip
+  command: python3 -m pip install --upgrade pip
+
+
+

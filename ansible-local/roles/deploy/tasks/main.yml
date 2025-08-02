@@ -1,0 +1,33 @@
+- name: Create a repo directory if it does not exist
+  ansible.builtin.file:
+    path: /home/{{ansible_ssh_user}}/repos
+    state: directory
+
+- name: Delete App directory if it exist
+  ansible.builtin.file:
+    path: /home/{{ansible_ssh_user}}/repos/{{app_name}}
+    state: absent
+
+- name: Clone goanpr Master branch
+  ansible.builtin.git:
+    repo: git@github.com:micrometre/goanpr.git
+    dest: /home/{{ansible_ssh_user}}/repos/{{app_name}}
+    update: yes  # Does a git pull if the repo already exists
+    accept_hostkey: yes
+    single_branch: yes
+    version: master
+
+- name: Start  Postgress Docker Containers
+  make:
+    chdir: /home/{{ansible_ssh_user}}/repos/{{app_name}}
+    target: update
+
+- name: Clear pip cache
+  ansible.builtin.shell: python3 -m pip cache purge
+  args:
+    chdir: /home/{{ansible_ssh_user}}/repos/
+
+- name: Install requirements
+  ansible.builtin.shell:
+    cmd: pip install -r requirements.txt 
+    chdir: /home/{{ansible_ssh_user}}/repos/{{app_name}}/plate_detector

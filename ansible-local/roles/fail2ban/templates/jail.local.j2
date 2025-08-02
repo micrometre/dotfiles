@@ -1,0 +1,23 @@
+[DEFAULT]
+
+backend = polling
+ignoreip = 127.0.0.1
+bantime  = 3600
+maxretry = 3 
+loglevel = INFO
+logtarget = /var/log/fail2ban.log
+
+[sshd]
+enabled = true
+port    = {{ security_ssh_port }}
+filter  = sshd
+logpath  = /var/log/auth.log
+
+
+[nginx-http-auth]
+enabled  = true
+
+
+{% if ansible_os_family == 'Debian' and ansible_distribution_major_version | int >= 12 %}
+backend = systemd
+{% endif %}

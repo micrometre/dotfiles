@@ -1,0 +1,67 @@
+---
+- name: install nginx
+  apt: name=nginx state=present
+  notify: restart nginx
+
+- name: write  nginx.conf
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: write  /etc/nginx/sites-available/default
+  template: src=default-site.j2 dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+  
+- name: write  /etc/nginx/sites-available/microanpr.xyz
+  template: src=microanpr.xyz.j2 dest=/etc/nginx/sites-available/microanpr.xyz
+  notify: restart nginx
+
+- name: Enable default site
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: restart nginx
+
+- name: Enable microanpr.xyz 
+  file:
+    src: /etc/nginx/sites-available/microanpr.xyz
+    dest: /etc/nginx/sites-enabled/microanpr.xyz
+    state: link
+  notify: restart nginx
+
+- name: Creates directory /var/www/microanpr_xyz.html/html
+  ansible.builtin.file:
+    path: /var/www/microanpr_xyz.html/html
+    state: directory
+
+
+- name: deploy website content /var/www/microanpr_xyz.html/index.html
+  template: src=index.html.j2 dest=/var/www/microanpr_xyz.html/html/index.html
+  notify: restart nginx
+
+- name: Install htpasswd
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apache2-utils  # For Debian/Ubuntu
+
+- name: Install package passlib
+  ansible.builtin.shell:
+    cmd: python3 -m pip install passlib
+    chdir: /home/{{ansible_ssh_user}}/
+
+- name: Create/Update user in password file
+  htpasswd:
+    path: /etc/nginx/.htpasswd
+    name: cbwmicroanpr
+    password: "{{ user_password }}"
+  vars:
+    user_password: cbwpa55word  # Use Ansible Vault for production    
+  notify: restart nginx
+
+- name: Change App directory  before creating nginx certs
+  ansible.builtin.shell: scripts/make-certs-nginx.sh 
+  args:
+    chdir: /home/{{ansible_ssh_user}}/repos/{{app_name}}/ansible/
+  notify: restart nginx

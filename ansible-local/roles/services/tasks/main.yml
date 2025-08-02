@@ -1,0 +1,38 @@
+- name: copy Flask Alpr App service config
+  template:
+    src: alpr-flask.service.j2
+    dest: /etc/systemd/system/alpr-flask.service
+
+- name: copy Flask Alpr Redis service config
+  template:
+    src: alpr-redis.service.j2
+    dest: /etc/systemd/system/alpr-redis.service
+
+- name: copy Flask Alpr Redis Commander service config
+  template:
+    src: alpr-redis-commander.service.j2
+    dest: /etc/systemd/system/alpr-redis-commander.service
+
+- name: copy OpenALPR upload videos/pictures service config
+  template:
+    src: alpr-openalpr.service.j2
+    dest: /etc/systemd/system/alpr-openalpr.service
+
+- name: copy OpenALPR Camera service config
+  template:
+    src: alpr-openalpr-camera.service.j2
+    dest: /etc/systemd/system/alpr-openalpr-camera.service
+
+
+- name: Restart service and Systemd Reload Daemon
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    name: '{{ item }}'
+  with_items:
+    - alpr-flask.service 
+    - alpr-redis.service 
+    - alpr-redis-commander.service 
+    - alpr-openalpr.service
+    - alpr-openalpr-camera.service
+  

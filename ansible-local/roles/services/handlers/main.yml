@@ -1,0 +1,4 @@
+# handlers file for haproxy
+---
+- name: restart alpr-flask.service 
+  service: name=alpr-flask.service state=restarted

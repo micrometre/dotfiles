@@ -22,9 +22,6 @@
   notify:
     - restart ssh
 
-
-
-
 - name: allow 'user dell' to have passwordless sudo
   lineinfile:
     dest: /etc/sudoers

@@ -1,0 +1,7 @@
+---
+sys_packages: [ 'curl', 'vim', 'git',  "apt-transport-https", "ca-certificates", "curl", "gnupg2", "software-properties-common"]
+python3_packages: ['python3-pip', 'python3-virtualenv', 'python3-setuptools']
+#ansible_ssh_user: ubuntu
+github_user: micrometre
+home_user: ubuntu
+app_name: goanpr  # aligned with github repo name

@@ -1,0 +1,10 @@
+#ExecStart=/home/dell/repos/pyanpr/.venv/bin/python  /home/dell/repos/pyanpr/test.py
+[Unit]
+Description=Alpr Flask
+After=systemd-user-sessions.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/vagrant/microanpr
+ExecStart=/home/vagrant/microanpr/.venv/bin/flask --app microanpr run -h 0.0.0.0 --debug --reload
+Restart=always

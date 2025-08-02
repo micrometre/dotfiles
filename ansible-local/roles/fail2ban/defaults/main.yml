@@ -1,0 +1,5 @@
+---
+security_ssh_port: 22
+
+security_fail2ban_enabled: true
+security_fail2ban_custom_configuration_template: "jail.local.j2"
