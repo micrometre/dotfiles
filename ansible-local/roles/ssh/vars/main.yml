@@ -1,0 +1,4 @@
+---
+# SSH variables for Ubuntu/Debian distributions
+ssh_config_path: /etc/ssh/sshd_config
+ssh_sshd_name: ssh

@@ -46,10 +46,13 @@
   loop:
     - apache2-utils  # For Debian/Ubuntu
 
-- name: Install package passlib
-  ansible.builtin.shell:
-    cmd: python3 -m pip install passlib
-    chdir: /home/{{ansible_ssh_user}}/
+- name: install python3-passlib
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3-pip
+    - python3-passlib
 
 - name: Create/Update user in password file
   htpasswd:
@@ -60,8 +63,14 @@
     user_password: cbwpa55word  # Use Ansible Vault for production    
   notify: restart nginx
 
-- name: Change App directory  before creating nginx certs
-  ansible.builtin.shell: scripts/make-certs-nginx.sh 
+- name: Copy nginx cert creation script to remote host
+  ansible.builtin.copy:
+    src: ../../scripts/make-certs-nginx.sh
+    dest: /tmp/make-certs-nginx.sh
+    mode: '0755'
+
+- name: Execute nginx cert creation script on remote host
+  ansible.builtin.shell: /tmp/make-certs-nginx.sh
   args:
-    chdir: /home/{{ansible_ssh_user}}/repos/{{app_name}}/ansible/
+    chdir: /home/{{ansible_ssh_user}}
   notify: restart nginx

@@ -11,8 +11,6 @@
 
 - name: set timezone to UTC.
   ansible.builtin.shell: timedatectl set-timezone Europe/London
-  args:
-    chdir: /home/{{ansible_ssh_user}}/repos/{{app_name}}
 
 
 - name: Copy jail custom configuration file into place.

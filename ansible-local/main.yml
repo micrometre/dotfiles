@@ -1,35 +1,101 @@
-- name: playbook for localhost
-  hosts: ubuntu
+- name: playbook to setup virtualization (QEMU/KVM/libvirt)
+  hosts: localhost
+  roles:
+    - virtualization
+  tags: setup_virtualization
+
+- name: playbook to create and manage VMs
+  hosts: localhost
+  roles:
+    - vm-manager
+  tags: create_vm
+
+- name: playbook for common setup
+  hosts: microanpr
   remote_user: ubuntu
   become: True
   roles:
     - common
-    - users
-    - docker
-    - golang
-    # openalpr
-    - xapps
-  tags: setup
+  tags: setup_common
 
-- name: playbook for localhost
-  hosts: ubuntu
+- name: playbook to setup python 3.10
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - python
+  tags: setup_python
+
+- name: playbook for users setup
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - users
+  tags: setup_users
+
+- name: playbook to setup docker
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - docker
+  tags: setup_docker
+
+- name: playbook to setup golang
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - golang
+  tags: setup_golang
+
+
+- name: playbook to setup openalpr
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    # openalpr
+  tags: setup_openalpr
+
+
+- name: playbook to setup nginx
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - nginx
+  tags: setup_nginx
+
+- name: playbook to setup ssh security
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - ssh
+  tags: setup_ssh
+
+- name: playbook to setup fail2ban
+  hosts: microanpr
+  remote_user: ubuntu
+  become: True
+  roles:
+    - fail2ban
+  tags: setup_fail2ban
+
+- name: playbook to setup nodejs
+  hosts: microanpr
   remote_user: ubuntu
   become: False
   roles:
     - nodejs
-  tags: setupNodejs
+  tags: setup_nodejs
 
-- name: playbook for localhost
-  hosts: ubuntu
+- name: playbook to deploy app
+  hosts: microanpr
   remote_user: ubuntu
   become: False
   roles:
-    - dotfiles
-  tags: setupDotfiles
-
-- name: playbook for localhost
-  hosts: local
-  become: True
-  roles:
-    - pipx
-  tags: setupPipx
+    - deploy
+  tags: setup_deploy
