@@ -1,0 +1,15 @@
+# Backup files
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tgz
+
+# Log files
+*.log
+
+# Snapshot files
+*.snar
+
+# Temporary files
+*.tmp
+.backup-*

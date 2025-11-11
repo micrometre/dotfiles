@@ -1,0 +1,8 @@
+- name: Create a Multipass VM
+  theko2fi.multipass.multipass_vm:
+    name: microanpr
+    cpus: 2
+    memory: 2G
+    disk: 18G
+    state: started
+    

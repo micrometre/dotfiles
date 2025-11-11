@@ -1,0 +1,97 @@
+- name: playbook to setup virtualization (QEMU/KVM/libvirt)
+  hosts: localhost
+  roles:
+    - virtualization
+  tags: setup_virtualization
+
+- name: playbook to create and manage VMs
+  hosts: localhost
+  roles:
+    - vm-manager
+  tags: create_vm
+
+- name: playbook for common setup
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - common
+    - users
+    - docker
+  tags: setup_common
+
+- name: playbook to setup python 3.10
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - python
+  tags: setup_python
+
+- name: playbook for users setup
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - users
+  tags: setup_users
+
+- name: playbook to setup docker
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - docker
+  tags: setup_docker
+
+- name: playbook to setup golang
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    # golang
+  tags: setup_golang
+
+
+
+
+- name: playbook to setup nginx
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - nginx
+  tags: setup_nginx
+
+- name: playbook to setup ssh security
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - ssh
+  tags: setup_ssh
+
+- name: playbook to setup fail2ban
+  hosts: localhost
+  remote_user: ubuntu
+  become: True
+  roles:
+    - fail2ban
+  tags: setup_fail2ban
+
+- name: playbook to setup nodejs
+  hosts: localhost
+  remote_user: ubuntu
+  become: False
+  roles:
+    - nodejs
+  tags: setup_nodejs
+
+- name: playbook to setup dotfiles
+  hosts: localhost
+  remote_user: ubuntu
+  become: False
+  roles:
+    - dotfiles
+  tags: setup_dotfiles
+

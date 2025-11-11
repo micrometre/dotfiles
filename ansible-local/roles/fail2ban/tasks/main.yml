@@ -1,0 +1,4 @@
+---
+# Fail2Ban
+- include_tasks: fail2ban.yml
+

@@ -1,0 +1,4 @@
+---
+# Ubuntu/Debian specific variables
+python_executable: "python{{ python_version }}"
+pip_executable: "pip{{ python_version }}"

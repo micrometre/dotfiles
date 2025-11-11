@@ -1,0 +1,48 @@
+---
+- name: Add deadsnakes PPA for Python versions
+  apt_repository:
+    repo: "{{ deadsnakes_ppa }}"
+    state: present
+    update_cache: yes
+
+- name: Install software-properties-common
+  apt:
+    name: software-properties-common
+    state: present
+
+- name: Install Python {{ python_version }} and related packages
+  apt:
+    name: "{{ python_packages }}"
+    state: present
+    update_cache: yes
+
+- name: Verify Python {{ python_version }} installation
+  command: "python{{ python_version }} --version"
+  register: python_version_check
+  changed_when: false
+
+- name: Display Python version
+  debug:
+    msg: "Installed Python version: {{ python_version_check.stdout }}"
+
+- name: Create symbolic link for python3.10 as python3-project (optional)
+  file:
+    src: "/usr/bin/python{{ python_version }}"
+    dest: "/usr/local/bin/python3-project"
+    state: link
+  when: python_version != "3.12"
+
+- name: Ensure pip is available for Python {{ python_version }}
+  command: "python{{ python_version }} -m ensurepip --upgrade"
+  register: pip_install_result
+  failed_when: false
+  changed_when: "'Successfully installed' in pip_install_result.stdout"
+
+- name: Verify pip installation for Python {{ python_version }}
+  command: "python{{ python_version }} -m pip --version"
+  register: pip_version_check
+  changed_when: false
+
+- name: Display pip version
+  debug:
+    msg: "Pip version for Python {{ python_version }}: {{ pip_version_check.stdout }}"

@@ -1,0 +1,76 @@
+---
+- name: install nginx
+  apt: name=nginx state=present
+  notify: restart nginx
+
+- name: write  nginx.conf
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: write  /etc/nginx/sites-available/default
+  template: src=default-site.j2 dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+  
+- name: write  /etc/nginx/sites-available/microanpr.xyz
+  template: src=microanpr.xyz.j2 dest=/etc/nginx/sites-available/microanpr.xyz
+  notify: restart nginx
+
+- name: Enable default site
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: restart nginx
+
+- name: Enable microanpr.xyz 
+  file:
+    src: /etc/nginx/sites-available/microanpr.xyz
+    dest: /etc/nginx/sites-enabled/microanpr.xyz
+    state: link
+  notify: restart nginx
+
+- name: Creates directory /var/www/microanpr_xyz.html/html
+  ansible.builtin.file:
+    path: /var/www/microanpr_xyz.html/html
+    state: directory
+
+
+- name: deploy website content /var/www/microanpr_xyz.html/index.html
+  template: src=index.html.j2 dest=/var/www/microanpr_xyz.html/html/index.html
+  notify: restart nginx
+
+- name: Install htpasswd
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apache2-utils  # For Debian/Ubuntu
+
+- name: install python3-passlib
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3-pip
+    - python3-passlib
+
+- name: Create/Update user in password file
+  htpasswd:
+    path: /etc/nginx/.htpasswd
+    name: cbwmicroanpr
+    password: "{{ user_password }}"
+  vars:
+    user_password: cbwpa55word  # Use Ansible Vault for production    
+  notify: restart nginx
+
+- name: Copy nginx cert creation script to remote host
+  ansible.builtin.copy:
+    src: ../../scripts/make-certs-nginx.sh
+    dest: /tmp/make-certs-nginx.sh
+    mode: '0755'
+
+- name: Execute nginx cert creation script on remote host
+  ansible.builtin.shell: /tmp/make-certs-nginx.sh
+  args:
+    chdir: /home/{{ansible_ssh_user}}
+  notify: restart nginx
