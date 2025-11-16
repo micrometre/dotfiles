@@ -176,3 +176,26 @@ gpu_summary() {
     fi
     echo "========================================="
 }
+
+
+
+# Ollama GPU debugging and testing aliases
+alias ollama-debug='~/scripts/debug_ollama_intel.sh'
+alias ollama-test='~/scripts/test_ollama_gpu.sh'
+alias ollama-install='~/scripts/install_ollam.sh'
+
+# GPU monitoring
+alias gpu-monitor='intel_gpu_top'
+alias gpu-temp='sensors | grep -A 10 "coretemp\|Package"'
+
+# Ollama with GPU optimization
+alias ollama-gpu='OLLAMA_GPU_OVERRIDE=1 ZE_AFFINITY_MASK=0 ollama'
+
+# Quick Ollama model tests optimized for Intel Iris Xe
+alias test-phi3='ollama run phi3:mini'
+alias test-gemma='ollama run gemma2:2b'
+alias test-llama='ollama run llama3.2:3b'
+
+
+
+
