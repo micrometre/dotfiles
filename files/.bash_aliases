@@ -135,3 +135,44 @@ hardware_summary() {
     echo "OS: $(lsb_release -d 2>/dev/null | cut -d':' -f2 | sed 's/^ *//' || cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2 | tr -d '"')"
     echo "========================================="
 }
+
+# GPU Information Commands
+# Show GPU information
+alias gpu-info='lspci | grep -i vga'
+alias gpu-details='lspci -v | grep -A 12 VGA'
+alias gpu-nvidia='nvidia-smi 2>/dev/null || echo "NVIDIA drivers not installed or no NVIDIA GPU found"'
+alias gpu-all='lspci | grep -i "vga\|3d\|display"'
+
+# Get GPU driver information
+alias gpu-driver='lsmod | grep -i "nvidia\|radeon\|i915\|amdgpu"'
+alias gpu-glx='glxinfo | grep "OpenGL renderer" 2>/dev/null || echo "Install mesa-utils: sudo apt install mesa-utils"'
+
+# Comprehensive GPU information
+gpu_summary() {
+    echo "========================================="
+    echo "GPU Information Summary"
+    echo "========================================="
+    echo "Graphics Cards:"
+    lspci | grep -i "vga\|3d\|display"
+    echo ""
+    
+    echo "Loaded GPU Drivers:"
+    lsmod | grep -i "nvidia\|radeon\|i915\|amdgpu" || echo "No common GPU drivers loaded"
+    echo ""
+    
+    if command -v nvidia-smi &> /dev/null; then
+        echo "NVIDIA GPU Status:"
+        nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader,nounits 2>/dev/null
+        echo ""
+    fi
+    
+    if command -v glxinfo &> /dev/null; then
+        echo "OpenGL Renderer:"
+        glxinfo | grep "OpenGL renderer"
+        echo "OpenGL Version:"
+        glxinfo | grep "OpenGL version"
+    else
+        echo "Install mesa-utils for OpenGL info: sudo apt install mesa-utils"
+    fi
+    echo "========================================="
+}
