@@ -56,4 +56,13 @@ docker network prune
 docker volume ls -q | xargs -r docker volume rm -f
 }
 
+# System cleanup 
+alias cleanup='sudo /home/ubuntu/.cleanup.sh'
+
+# Alternative cleanup function with confirmation
+cleanup_system() {
+    echo "Running system cleanup ..."
+    sudo /home/ubuntu/.cleanup.sh
+}
+
 
