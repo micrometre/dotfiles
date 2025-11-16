@@ -15,9 +15,7 @@
   remote_user: ubuntu
   become: True
   roles:
-    - common
-    - users
-    - docker
+    - golang
   tags: setup_common
 
 - name: playbook to setup python 3.10
@@ -49,11 +47,8 @@
   remote_user: ubuntu
   become: True
   roles:
-    # golang
+    - golang
   tags: setup_golang
-
-
-
 
 - name: playbook to setup nginx
   hosts: localhost

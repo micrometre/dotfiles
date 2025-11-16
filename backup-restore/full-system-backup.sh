@@ -13,8 +13,9 @@ HOSTNAME=$(hostname -s)
 DAY=$(date +%A)
 
 # What to backup - Based on actual system directories
-# Note: /snap contains snaps (5.1G), /boot has kernel images (254M)
-# /srv is typically for service data (currently empty)
+# Note: /snap contains snaps (3.0G), /boot has kernel images (211M)
+# /srv is typically for service data (4.0K - currently empty)
+# /home (5.2G), /var (1.5G), /opt (374M), /etc (24M), /usr/local (100K), /root (4.0K)
 BACKUP_DIRS="/home /etc /var /root /boot /opt /usr/local /srv"
 
 # Directories to exclude (to reduce backup size and avoid issues)
