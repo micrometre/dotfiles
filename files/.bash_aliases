@@ -65,4 +65,73 @@ cleanup_system() {
     sudo /home/ubuntu/.cleanup.sh
 }
 
+# Find largest files and directories
+# Show top 10 largest files in current directory (recursive)
+alias largest-files='find . -type f -exec du -h {} + 2>/dev/null | sort -rh | head -10'
 
+# Show top 10 largest directories in current directory
+alias largest-dirs='du -h --max-depth=1 2>/dev/null | sort -rh | head -10'
+
+# Show top 20 largest files system-wide (requires sudo for full access)
+alias largest-files-system='sudo find / -type f -exec du -h {} + 2>/dev/null | sort -rh | head -20'
+
+# Show disk usage of directories in current path, sorted by size
+alias disk-usage='du -h --max-depth=1 | sort -rh'
+
+# Find large files over 100MB in current directory
+alias find-large='find . -type f -size +100M -exec du -h {} + 2>/dev/null | sort -rh'
+
+# Interactive function to find largest files with custom size
+find_files_larger_than() {
+    if [ -z "$1" ]; then
+        echo "Usage: find_files_larger_than <size>"
+        echo "Example: find_files_larger_than 50M"
+        echo "Example: find_files_larger_than 1G"
+        return 1
+    fi
+    find . -type f -size +$1 -exec du -h {} + 2>/dev/null | sort -rh
+}
+
+# Show directory sizes with ncdu if available, fallback to du
+disk_analyzer() {
+    if command -v ncdu &> /dev/null; then
+        echo "Using ncdu for interactive disk analysis..."
+        ncdu
+    else
+        echo "ncdu not found, using du instead..."
+        echo "Install ncdu for better disk analysis: sudo apt install ncdu"
+        du -h --max-depth=2 | sort -rh | head -20
+    fi
+}
+
+# System Information Commands
+# Get laptop model and manufacturer
+alias laptop-model='sudo dmidecode -s system-product-name'
+alias laptop-manufacturer='sudo dmidecode -s system-manufacturer'
+alias laptop-serial='sudo dmidecode -s system-serial-number'
+
+# Complete system info
+alias system-info='echo "=== System Information ===" && echo "Manufacturer: $(sudo dmidecode -s system-manufacturer)" && echo "Model: $(sudo dmidecode -s system-product-name)" && echo "Serial: $(sudo dmidecode -s system-serial-number)" && echo "BIOS: $(sudo dmidecode -s bios-version)"'
+
+# Alternative methods for system info
+alias hw-info='lshw -short'
+alias laptop-info='inxi -M'  # requires inxi package
+alias cpu-info='lscpu | grep "Model name"'
+
+# Comprehensive hardware summary
+hardware_summary() {
+    echo "========================================="
+    echo "Hardware Information Summary"
+    echo "========================================="
+    echo "Manufacturer: $(sudo dmidecode -s system-manufacturer 2>/dev/null || echo 'Unknown')"
+    echo "Model: $(sudo dmidecode -s system-product-name 2>/dev/null || echo 'Unknown')"
+    echo "Serial Number: $(sudo dmidecode -s system-serial-number 2>/dev/null || echo 'Unknown')"
+    echo "BIOS Version: $(sudo dmidecode -s bios-version 2>/dev/null || echo 'Unknown')"
+    echo ""
+    echo "CPU: $(lscpu | grep 'Model name' | cut -d':' -f2 | sed 's/^ *//')"
+    echo "Memory: $(free -h | grep 'Mem:' | awk '{print $2}')"
+    echo "Disk: $(df -h / | tail -1 | awk '{print $2}')"
+    echo "Kernel: $(uname -r)"
+    echo "OS: $(lsb_release -d 2>/dev/null | cut -d':' -f2 | sed 's/^ *//' || cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2 | tr -d '"')"
+    echo "========================================="
+}
