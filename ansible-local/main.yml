@@ -74,13 +74,14 @@
     - fail2ban
   tags: setup_fail2ban
 
-- name: playbook to setup nodejs
+- name: playbook to setup nodejs and dotfiles
   hosts: localhost
   remote_user: ubuntu
   become: False
   roles:
     - nodejs
-  tags: setup_nodejs
+    - dotfiles
+  tags: setup_nodejs_dotfiles
 
 - name: playbook to setup dotfiles
   hosts: localhost
