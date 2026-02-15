@@ -196,6 +196,16 @@ alias test-phi3='ollama run phi3:mini'
 alias test-gemma='ollama run gemma2:2b'
 alias test-llama='ollama run llama3.2:3b'
 
-
+ollama_analyze () 
+{ 
+    local prompt="${1:-Analyze this project based on the following files and their contents:}";
+    local model="${2:-localmodel}";
+    ( echo "$prompt";
+    echo "";
+    ls --color=auto -la;
+    echo "";
+    echo "File contents:";
+    cat *.* 2> /dev/null ) | ollama run "$model"
+}
 
 
