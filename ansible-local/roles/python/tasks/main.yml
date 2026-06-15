@@ -1,16 +1,16 @@
 ---
-- name: Add deadsnakes APT source for Python versions
-  deb822_repository:
-    filename: deadsnakes
-    repo: "{{ deadsnakes_ppa }}"
-    state: "{{ 'absent' if python_uninstall else 'present' }}"
-    update_cache: yes
-  when: not (python_uninstall | bool)
-
 - name: Install software-properties-common
   apt:
     name: software-properties-common
     state: "{{ 'absent' if python_uninstall else 'present' }}"
+
+- name: Add deadsnakes APT source for Python versions
+  apt_repository:
+    repo: "{{ deadsnakes_ppa }}"
+    state: "{{ 'absent' if python_uninstall else 'present' }}"
+    update_cache: yes
+  when: not (python_uninstall | bool)
+  ignore_errors: yes
 
 
 - name: Install Python {{ python_version }} and related packages
