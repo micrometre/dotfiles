@@ -10,9 +10,16 @@
   include_tasks: status.yml
   when: vm_action | default('create') == 'status'
 
-- name: Skip VM creation tasks if only checking status or cleaning up
+- name: Include overview tasks
+  include_tasks: overview.yml
+  when: vm_action | default('create') == 'overview'
+
+- name: Skip VM creation tasks if only checking status, overview or cleaning up
   meta: end_play
-  when: (vm_action | default('create') == 'status') or (vm_cleanup | default(false) | bool)
+  when: >
+    (vm_action | default('create') == 'status') or 
+    (vm_action | default('create') == 'overview') or 
+    (vm_cleanup | default(false) | bool)
 
 - name: Create work directory
   file:
@@ -38,7 +45,7 @@
 
 - name: Re-check for SSH keys after generation
   stat:
-    path: "{{ ansible_env.HOME }}/.ssh/id_ed25519.pub"
+    path: "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/.ssh/id_ed25519.pub"
   register: generated_key_check
   when: 
     - generate_ssh_key | bool
@@ -47,7 +54,7 @@
 
 - name: Update SSH key path if key was generated
   set_fact:
-    ssh_public_key_path: "{{ ansible_env.HOME }}/.ssh/id_ed25519.pub"
+    ssh_public_key_path: "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/.ssh/id_ed25519.pub"
   when:
     - generate_ssh_key | bool
     - generated_key_check is defined
@@ -78,9 +85,9 @@
     path: "{{ item }}"
   register: ssh_key_alternatives
   loop:
-    - "{{ ansible_env.HOME }}/.ssh/id_ed25519.pub"
-    - "{{ ansible_env.HOME }}/.ssh/id_rsa.pub"
-    - "{{ ansible_env.HOME }}/.ssh/id_ecdsa.pub"
+    - "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/.ssh/id_ed25519.pub"
+    - "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/.ssh/id_rsa.pub"
+    - "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/.ssh/id_ecdsa.pub"
   when: ssh_public_key_file == "" or (ssh_key_stat is defined and not ssh_key_stat.stat.exists)
 
 - name: Find first existing SSH key
@@ -330,12 +337,12 @@
             vm_disk_size: "{{ vm_disk_size }}"
             vm_os_variant: "{{ vm_os_variant }}"
             description: "VM created via ANPR service integration"
-    dest: "{{ playbook_dir }}/inventory/vm-{{ vm_name }}.yml"
+    dest: "{{ playbook_dir }}/../inventory/vm-{{ vm_name }}.yml"
     mode: '0644'
 
 - name: Check if master created_vms.yml exists
   stat:
-    path: "{{ playbook_dir }}/inventory/created_vms.yml"
+    path: "{{ playbook_dir }}/../inventory/created_vms.yml"
   register: master_inventory_stat
 
 - name: Initialize master inventory if it doesn't exist
@@ -347,13 +354,13 @@
         children:
           created_vms:
             hosts:
-    dest: "{{ playbook_dir }}/inventory/created_vms.yml"
+    dest: "{{ playbook_dir }}/../inventory/created_vms.yml"
     mode: '0644'
   when: not master_inventory_stat.stat.exists
 
 - name: Add VM to master created_vms inventory
   blockinfile:
-    path: "{{ playbook_dir }}/inventory/created_vms.yml"
+    path: "{{ playbook_dir }}/../inventory/created_vms.yml"
     marker: "# {mark} ANSIBLE MANAGED BLOCK - {{ vm_name }}"
     insertafter: "hosts:"
     content: |
@@ -394,8 +401,8 @@
       
       Inventory files created:
       - {{ vm_workspace_dir }}/vm_inventory.yml (VM workspace inventory)
-      - {{ playbook_dir }}/inventory/vm-{{ vm_name }}.yml (Individual VM inventory)
-      - {{ playbook_dir }}/inventory/created_vms.yml (Master inventory - updated)
+      - {{ playbook_dir }}/../inventory/vm-{{ vm_name }}.yml (Individual VM inventory)
+      - {{ playbook_dir }}/../inventory/created_vms.yml (Master inventory - updated)
       
       You can connect via:
       - VNC (check 'virsh vncdisplay {{ vm_name }}')
@@ -405,10 +412,10 @@
       To access console: virsh console {{ vm_name }}
       
       To run ansible against this VM only:
-      ansible-playbook -i {{ playbook_dir }}/inventory/vm-{{ vm_name }}.yml your-playbook.yml
+      ansible-playbook -i {{ playbook_dir }}/../inventory/vm-{{ vm_name }}.yml your-playbook.yml
       
       To run against this VM from master inventory:
-      ansible-playbook -i {{ playbook_dir }}/inventory/created_vms.yml your-playbook.yml --limit {{ vm_name }}
+      ansible-playbook -i {{ playbook_dir }}/../inventory/created_vms.yml your-playbook.yml --limit {{ vm_name }}
       
       To run against all created VMs:
-      ansible-playbook -i {{ playbook_dir }}/inventory/created_vms.yml your-playbook.yml --limit created_vms
+      ansible-playbook -i {{ playbook_dir }}/../inventory/created_vms.yml your-playbook.yml --limit created_vms

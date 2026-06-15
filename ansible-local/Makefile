@@ -1,4 +1,4 @@
-.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_android_studio configure_dart_flutter uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_android_studio uninstall_dart_flutter ssh-agent 
+.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_android_studio configure_dart_flutter uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_android_studio uninstall_dart_flutter ssh-agent create_vm vm_status workspace clean clean_all
 
 help:
 	@echo "Ansible Infrastructure Management"
@@ -14,6 +14,11 @@ help:
 	@echo "  configure_docker       - Configure Docker"
 	@echo "  configure_virtualization - Configure virtualization support"
 	@echo "  configure_vm_manager   - Configure VM manager"
+	@echo "  create_vm              - Create a new VM (default: hal9000)"
+	@echo "  vm_status              - Check status of VMs"
+	@echo "  workspace              - Show VM workspace overview"
+	@echo "  clean                  - Cleanup a specific VM (default: hal9000)"
+	@echo "  clean_all              - Remove all VM images and workspace"
 	@echo "  uninstall_nodejs       - Uninstall Node.js / NVM"
 	@echo "  uninstall_python       - Remove Python packages and symlink"
 	@echo "  uninstall_dotfiles     - Remove dotfiles and Vim config"
@@ -22,11 +27,6 @@ help:
 	@echo "  uninstall_android_studio - Remove Android Studio"
 	@echo "  uninstall_dart_flutter - Remove Dart and Flutter snaps"
 	@echo "  ssh_agent              - Start SSH agent and add SSH key"
-	@echo "Quick Start:"
-	@echo "  1. make configure             # Setup Host"
-	@echo "  2. make configure_nodejs      # Setup Node.js"
-	@echo "  3. make configure_dotfiles    # Install dotfiles"
-	@echo "  4. make ssh-agent             # Start SSH agent for Git operations"
 
 
 configure:
@@ -34,7 +34,6 @@ configure:
 	ansible-playbook playbooks/configure.yml
 	@echo ""
 	@echo "✅ ${HOST_NAME} configured!"
-	@echo "Next: Add more roles to configure.yml or run 'make deploy' when ready"
 
 configure_update_upgrade:
 	@echo "Updating and upgrading ${HOST_NAME}..."
@@ -59,6 +58,31 @@ configure_vm_manager:
 	ansible-playbook playbooks/configure.yml --tags vm-manager
 	@echo ""
 	@echo "✅ ${HOST_NAME} configured with VM manager!"
+
+create_vm:
+	@echo "Creating VM..."
+	ansible-playbook playbooks/configure.yml --tags create-vm $(if $(VM_NAME),-e "vm_name=$(VM_NAME)",)
+
+vm_status:
+	@echo "Checking VM status..."
+	ansible-playbook playbooks/configure.yml --tags create-vm -e "vm_action=status" $(if $(VM_NAME),-e "vm_name=$(VM_NAME)",)
+
+workspace:
+	@echo "VM Workspace Overview..."
+	ansible-playbook playbooks/configure.yml --tags create-vm -e "vm_action=overview"
+
+clean:
+	@echo "Cleaning up VM..."
+	ansible-playbook playbooks/configure.yml --tags create-vm -e "vm_cleanup=true" $(if $(VM_NAME),-e "vm_name=$(VM_NAME)",)
+
+clean_all:
+	@echo "Cleaning all VMs and images..."
+	@# Remove the workspace and images directories as defined in role defaults
+	rm -rf $(HOME)/vm-workspace
+	rm -rf $(HOME)/vm-images
+	@echo "✅ All VM data cleaned!"
+
+
 
 configure_nodejs:
 	@echo "Configuring Node.js on ${HOST_NAME}..."
@@ -153,3 +177,7 @@ ssh-agent:
 
 
 
+
+# Legacy compatibility targets
+check: vm_status
+status: vm_status

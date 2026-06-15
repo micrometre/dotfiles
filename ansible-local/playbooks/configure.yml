@@ -20,6 +20,7 @@
     - { role: android-dev, tags: ["android-dev", "setup"], become: false }
     - { role: android-studio, tags: ["android-studio", "setup"], become: false }
     - { role: dart-flutter, tags: ["dart-flutter", "setup"], become: false }
+    - {role: vm-manager, tags: ["create-vm", "setup"], become: false}
   
   post_tasks:
     - name: Display configuration status

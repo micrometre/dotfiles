@@ -15,9 +15,9 @@ ubuntu_cloud_image_filename: "{{ ubuntu_version }}-server-cloudimg-amd64.img"
 
 # Libvirt storage paths
 libvirt_images_path: /var/lib/libvirt/images
-work_directory: "{{ ansible_env.HOME }}/vm-workspace"
+work_directory: "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/vm-workspace"
 vm_workspace_dir: "{{ work_directory }}/{{ vm_name }}"
-shared_images_dir: "{{ ansible_env.HOME }}/vm-images"
+shared_images_dir: "{{ configure_user_home | default('/home/' + (ansible_user | default(ansible_user_id))) }}/vm-images"
 
 # Network configuration
 vm_network: bridge=virbr0,model=virtio

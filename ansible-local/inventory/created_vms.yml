@@ -1,0 +1,6 @@
+# Master inventory for all created VMs
+# Updated: 2026-06-15T10:26:22Z
+all:
+  children:
+    created_vms:
+      hosts:
