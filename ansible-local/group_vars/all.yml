@@ -1,3 +1,9 @@
----
-copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-ansible_python_interpreter: /usr/bin/python3
+# SSH Configuration
+ssh_key_path: "~/.ssh/id_rsa.pub"
+
+# Certificate and hostname configuration
+cert_hostnames:
+  - localhost
+  - 127.0.0.1
+  - ::1
+  - cbwanpr

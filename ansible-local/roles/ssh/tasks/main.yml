@@ -25,12 +25,13 @@
       line: "PermitEmptyPasswords {{ ssh_permit_empty_password }}"
     - regexp: "^ChallengeResponseAuthentication"
       line: "ChallengeResponseAuthentication {{ ssh_challenge_response_auth }}"
+    - regexp: "^KbdInteractiveAuthentication"
+      line: "KbdInteractiveAuthentication {{ ssh_challenge_response_auth }}"
     - regexp: "^GSSAPIAuthentication"
       line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}"
     - regexp: "^X11Forwarding"
       line: "X11Forwarding {{ ssh_x11_forwarding }}"
   notify:
-    - reload systemd
     - restart ssh
 
 - name: Add configured users allowed to connect over ssh
@@ -60,7 +61,7 @@
 - name: Add configured user accounts to passwordless sudoers
   lineinfile:
     dest: /etc/sudoers
-    regexp: '^{{ item }}'
+    regexp: '^{{ item }}\s'
     line: '{{ item }} ALL=(ALL) NOPASSWD: ALL'
     state: present
     validate: 'visudo -cf %s'
@@ -71,7 +72,7 @@
 - name: Add configured user accounts to passworded sudoers
   lineinfile:
     dest: /etc/sudoers
-    regexp: '^{{ item }}'
+    regexp: '^{{ item }}\s'
     line: '{{ item }} ALL=(ALL) ALL'
     state: present
     validate: 'visudo -cf %s'

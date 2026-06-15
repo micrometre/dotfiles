@@ -1,4 +1,5 @@
 ---
-# SSH variables for Ubuntu/Debian distributions
-ssh_config_path: /etc/ssh/sshd_config
-ssh_sshd_name: ssh
+# SSH variables for Ubuntu/Debian distributions.
+# NOTE: ssh_config_path and ssh_sshd_name live in defaults/main.yml so they
+# remain overridable from inventory (group_vars/host_vars). Do not redefine
+# overridable defaults here, as role vars/ outrank inventory variables.

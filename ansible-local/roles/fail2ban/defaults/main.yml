@@ -1,5 +1,20 @@
 ---
-security_ssh_port: 22
+fail2ban_service_state: started
+fail2ban_service_enabled: true
 
-security_fail2ban_enabled: true
-security_fail2ban_custom_configuration_template: "jail.local.j2"
+# Host paths where the Docker nginx container writes (compose: ./nginx/logs -> /var/log/nginx).
+# Match playbooks/deploy_app.yml app_dir + fastapi-config (compose project dir).
+fail2ban_app_dir: /home/ubuntu/repos/fastapi-anpr-api
+# Basic auth failures (password mismatch / user not in htpasswd) go to nginx error_log, which is what
+# filter nginx-http-auth matches — not access.log.
+fail2ban_nginx_error_log: "{{ fail2ban_app_dir }}/fastapi-config/nginx/logs/error.log"
+fail2ban_nginx_access_log: "{{ fail2ban_app_dir }}/fastapi-config/nginx/logs/access.log"
+
+fail2ban_nginx_http_auth_enabled: true
+fail2ban_nginx_http_auth_maxretry: 5
+fail2ban_nginx_botsearch_enabled: false
+fail2ban_nginx_botsearch_maxretry: 2
+
+# Fail2ban time expressions (e.g. 10m, 1h, 1d)
+fail2ban_nginx_findtime: 10m
+fail2ban_nginx_bantime: 1h

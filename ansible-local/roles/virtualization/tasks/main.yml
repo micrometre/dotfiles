@@ -4,7 +4,8 @@
 - name: Check if running as root
   fail:
     msg: "This role should not be run as root user"
-  when: ansible_user_id == 'root'
+  when: >
+    (ansible_env.SUDO_USER | default(ansible_env.USER | default(ansible_env.LOGNAME | default(ansible_facts["user_id"])))) == 'root'
 
 - name: Check virtualization support
   shell: grep -E '(vmx|svm)' /proc/cpuinfo
@@ -87,6 +88,7 @@
   shell: virsh version
   register: libvirt_version
   changed_when: false
+  become: yes
 
 - name: Display libvirt version
   debug:

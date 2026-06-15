@@ -1,48 +1,62 @@
 ---
-- name: Add deadsnakes PPA for Python versions
-  apt_repository:
+- name: Add deadsnakes APT source for Python versions
+  deb822_repository:
+    filename: deadsnakes
     repo: "{{ deadsnakes_ppa }}"
-    state: present
+    state: "{{ 'absent' if python_uninstall else 'present' }}"
     update_cache: yes
+  when: not (python_uninstall | bool)
 
 - name: Install software-properties-common
   apt:
     name: software-properties-common
-    state: present
+    state: "{{ 'absent' if python_uninstall else 'present' }}"
+
 
 - name: Install Python {{ python_version }} and related packages
   apt:
     name: "{{ python_packages }}"
-    state: present
+    state: "{{ 'absent' if python_uninstall else 'present' }}"
     update_cache: yes
 
 - name: Verify Python {{ python_version }} installation
   command: "python{{ python_version }} --version"
   register: python_version_check
   changed_when: false
+  when: not (python_uninstall | bool)
 
 - name: Display Python version
   debug:
     msg: "Installed Python version: {{ python_version_check.stdout }}"
+  when: not (python_uninstall | bool)
 
 - name: Create symbolic link for python3.10 as python3-project (optional)
   file:
     src: "/usr/bin/python{{ python_version }}"
     dest: "/usr/local/bin/python3-project"
     state: link
-  when: python_version != "3.12"
+  when: python_version != "3.12" and not (python_uninstall | bool)
+
+- name: Remove symbolic link for python3-project
+  file:
+    dest: "/usr/local/bin/python3-project"
+    state: absent
+  when: python_version != "3.12" and python_uninstall | bool
 
 - name: Ensure pip is available for Python {{ python_version }}
   command: "python{{ python_version }} -m ensurepip --upgrade"
   register: pip_install_result
   failed_when: false
   changed_when: "'Successfully installed' in pip_install_result.stdout"
+  when: not (python_uninstall | bool)
 
 - name: Verify pip installation for Python {{ python_version }}
   command: "python{{ python_version }} -m pip --version"
   register: pip_version_check
   changed_when: false
+  when: not (python_uninstall | bool)
 
 - name: Display pip version
   debug:
     msg: "Pip version for Python {{ python_version }}: {{ pip_version_check.stdout }}"
+  when: not (python_uninstall | bool)

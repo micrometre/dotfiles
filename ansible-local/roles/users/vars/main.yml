@@ -1,8 +1,16 @@
 ---
 create_users:
     - ubuntu
-    
-git_user:
-    - dell
+create_restricted_user:
+    - anpr
 copy_local_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+# Initial passwords (override via vault/group_vars in production).
+# Only applied on user creation (update_password: on_create), so changing
+# these later will not silently reset existing accounts.
+regular_user_password: "password"
+restricted_user_password: "password"
+
+# Enable GDM3 GUI auto-login for the restricted (kiosk) user.
+autologin_enabled: true
 

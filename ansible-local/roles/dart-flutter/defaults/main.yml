@@ -1,0 +1,37 @@
+---
+# Default variables for Dart/Flutter role
+
+# Flutter installation method
+flutter_install_method: "snap"  # Options: snap, git
+flutter_snap_classic: true
+flutter_uninstall: false
+
+# For git-based installation (if needed)
+flutter_repo_url: "https://github.com/flutter/flutter.git"
+flutter_channel: "stable"  # Options: stable, beta, dev, master
+
+# Dart configuration
+dart_sdk_version: "latest"
+
+# Dependencies
+flutter_dependencies:
+  - git
+  - curl
+  - xz-utils
+  - zip
+  - libglu1-mesa
+  - fonts-noto-color-emoji
+  - libstdc++-12-dev
+  - libstdc++6
+  - build-essential
+  - cmake
+  - ninja-build
+  - libgtk-3-dev
+  - mesa-utils
+  - pkg-config
+
+# Verify installation
+verify_installation: true
+
+# Enable analytics
+flutter_analytics_enabled: true

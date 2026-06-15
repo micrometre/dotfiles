@@ -1,77 +1,141 @@
-# Check playbook syntax
-check-syntax:
-	ansible-playbook --syntax-check main.yml
+.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_dart_flutter uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_dart_flutter ssh-agent 
+
+help:
+	@echo "Ansible Infrastructure Management"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  configure              - Configure (install base packages, setup)"
+	@echo "  configure_nodejs       - Install and configure Node.js via NVM"
+	@echo "  configure_python       - Install and configure Python"
+	@echo "  configure_dotfiles     - Install dotfiles and Vim config"
+	@echo "  configure_android_dev  - Configure Android development environment"
+	@echo "  configure_dart_flutter - Configure Dart/Flutter via snap"
+	@echo "  configure_docker       - Configure Docker"
+	@echo "  configure_virtualization - Configure virtualization support"
+	@echo "  configure_vm_manager   - Configure VM manager"
+	@echo "  uninstall_nodejs       - Uninstall Node.js / NVM"
+	@echo "  uninstall_python       - Remove Python packages and symlink"
+	@echo "  uninstall_dotfiles     - Remove dotfiles and Vim config"
+	@echo "  uninstall_docker       - Remove Docker packages and config"
+	@echo "  uninstall_android_dev  - Remove Android development environment"
+	@echo "  uninstall_dart_flutter - Remove Dart and Flutter snaps"
+	@echo "  ssh_agent              - Start SSH agent and add SSH key"
+	@echo "Quick Start:"
+	@echo "  1. make configure             # Setup Host"
+	@echo "  2. make configure_nodejs      # Setup Node.js"
+	@echo "  3. make configure_dotfiles    # Install dotfiles"
+	@echo "  4. make ssh-agent             # Start SSH agent for Git operations"
 
 
-# VM Management targets
-setup-virtualization:
-	ansible-playbook -i inventory/inventory.yml main.yml --tags setup_virtualization
+configure:
+	@echo "Configuring ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured!"
+	@echo "Next: Add more roles to configure.yml or run 'make deploy' when ready"
 
-create-vm:
-	ansible-playbook -i inventory/inventory.yml main.yml --tags create_vm
+configure_update_upgrade:
+	@echo "Updating and upgrading ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags common
+	@echo ""
+	@echo "✅ ${HOST_NAME} updated and upgraded!"
 
-vm-status:
-	ansible-playbook -i inventory/inventory.yml main.yml --tags create_vm -e "vm_action=status"
-	sleep 15 && virsh domifaddr hal9000 --source arp
-	ssh -o StrictHostKeyChecking=no ubuntu@192.168.122.100 "hostname && ip addr show enp1s0"
+configure_docker:
+	@echo "Configuring Docker on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags docker
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with Docker!"
 
-vm-cleanup:
-	ansible-playbook -i inventory/inventory.yml main.yml --tags create_vm -e "vm_cleanup=true"
+configure_virtualization:
+	@echo "Configuring virtualization on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags virtualization
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with virtualization!"
 
-vm-overview:
-	@echo "VM Workspace Overview:"
-	@if [ -d "$(HOME)/vm-workspace" ]; then \
-		echo "Total usage: $$(du -sh $(HOME)/vm-workspace | cut -f1)"; \
-		echo "VM directories:"; \
-		ls -la $(HOME)/vm-workspace/; \
-		echo ""; \
-		echo "Structure:"; \
-		if command -v tree >/dev/null 2>&1; then \
-			tree $(HOME)/vm-workspace -h; \
-		else \
-			find $(HOME)/vm-workspace -type f -exec ls -lh {} \;; \
-		fi; \
+configure_vm_manager:
+	@echo "Configuring VM manager on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags vm-manager
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with VM manager!"
+
+configure_nodejs:
+	@echo "Configuring Node.js on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags nodejs
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with Node.js!"
+
+configure_python:
+	@echo "Configuring Python on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags python
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with Python!"
+
+configure_dotfiles:
+	@echo "Configuring dotfiles on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags dotfiles
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with dotfiles!"
+
+configure_android_dev:
+	@echo "Configuring Android Development on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags android-dev
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with Android Development!"
+
+configure_dart_flutter:
+	@echo "Configuring Dart/Flutter on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags dart-flutter
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with Dart/Flutter!"
+
+uninstall_nodejs:
+	@echo "Uninstalling Node.js/NVM on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags nodejs -e nodejs_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} uninstalled Node.js/NVM!"
+
+uninstall_python:
+	@echo "Uninstalling Python on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags python -e python_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} uninstalled Python!"
+
+uninstall_dotfiles:
+	@echo "Removing dotfiles on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags dotfiles -e dotfiles_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} removed dotfiles!"
+
+uninstall_docker:
+	@echo "Uninstalling Docker on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags docker -e docker_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} uninstalled Docker!"
+
+uninstall_android_dev:
+	@echo "Removing Android development environment on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags android-dev -e android_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} removed Android development environment!"
+
+uninstall_dart_flutter:
+	@echo "Removing Dart/Flutter on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags dart-flutter -e flutter_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} removed Dart/Flutter!"
+
+
+
+
+ssh-agent:
+	@echo "Checking SSH agent..."
+	@if ssh-add -l >/dev/null 2>&1; then \
+		echo "✅ SSH agent is already running with keys loaded"; \
 	else \
-		echo "No workspace found at $(HOME)/vm-workspace"; \
+		echo "Starting SSH agent and adding key..."; \
+		ssh-add ~/.ssh/id_rsa; \
+		echo "✅ SSH agent started!"; \
 	fi
 
-setup-vm-full: setup-virtualization create-vm
 
-# Create custom VM with specific name and static IP
-custom_vm:
-	ansible-playbook -i inventory/inventory.yml main.yml --tags create_vm \
-		-e "vm_name=ubuntu" \
-		-e "vm_hostname=ubuntu" \
-		-e "vm_static_ip=192.168.122.100"
 
-# Clean all VMs and storage completely using virsh
-clean_full:
-	@echo "Destroying all VMs and removing all storage..."
-	@for vm in $$(virsh list --all --name 2>/dev/null | grep -v '^$$'); do \
-		echo "Destroying VM: $$vm"; \
-		virsh destroy "$$vm" 2>/dev/null || true; \
-		virsh undefine "$$vm" --remove-all-storage 2>/dev/null || true; \
-	done
-	@echo "Cleaning VM workspace directory..."
-	@if [ -d "$(HOME)/vm-workspace" ]; then \
-		rm -rf "$(HOME)/vm-workspace"; \
-		echo "Removed $(HOME)/vm-workspace"; \
-	else \
-		echo "No VM workspace found at $(HOME)/vm-workspace"; \
-	fi
-	@echo "Cleaning inventory files..."
-	@if ls inventory/vm-*.yml 1> /dev/null 2>&1; then \
-		rm -f inventory/vm-*.yml; \
-		echo "Removed individual VM inventory files"; \
-	fi
-	@if [ -f "inventory/created_vms.yml" ]; then \
-		rm -f "inventory/created_vms.yml"; \
-		echo "Removed master inventory file"; \
-	fi
-	@echo "Complete cleanup finished!"
-
-sshkey_multipass:
-	cat ~/.ssh/*.pub | multipass exec microanpr -- tee -a .ssh/authorized_keys
-
-vars:
-	ansible -m debug -a var=hostvars all  

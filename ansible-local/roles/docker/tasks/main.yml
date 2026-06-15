@@ -4,94 +4,102 @@
   vars:
     params:
       files:
-        - '{{ansible_distribution}}.yml'
-        - '{{ansible_os_family}}.yml'
+        - '{{ansible_facts.distribution}}.yml'
+        - '{{ansible_facts.os_family}}.yml'
         - main.yml
       paths:
         - 'vars'
 
 - include_tasks: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts.os_family == 'RedHat'
 
 - include_tasks: setup-Debian.yml
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts.os_family == 'Debian'
 
 - name: Install Docker packages.
   package:
     name: "{{ docker_packages }}"
-    state: "{{ docker_packages_state }}"
+    state: "{{ 'absent' if docker_uninstall else docker_packages_state }}"
   notify: restart docker
   ignore_errors: "{{ ansible_check_mode }}"
-  when: "ansible_version.full is version_compare('2.12', '<') or ansible_os_family not in ['RedHat', 'Debian']"
+  when: "ansible_version.full is version_compare('2.12', '<') or ansible_facts.os_family not in ['RedHat', 'Debian']"
 
 - name: Install Docker packages (with downgrade option).
   package:
     name: "{{ docker_packages }}"
-    state: "{{ docker_packages_state }}"
+    state: "{{ 'absent' if docker_uninstall else docker_packages_state }}"
     allow_downgrade: true
   notify: restart docker
   ignore_errors: "{{ ansible_check_mode }}"
-  when: "ansible_version.full is version_compare('2.12', '>=') and ansible_os_family in ['RedHat', 'Debian']"
+  when: "ansible_version.full is version_compare('2.12', '>=') and ansible_facts.os_family in ['RedHat', 'Debian']"
 
 - name: Install docker-compose plugin.
   package:
     name: "{{ docker_compose_package }}"
-    state: "{{ docker_compose_package_state }}"
+    state: "{{ 'absent' if docker_uninstall else docker_compose_package_state }}"
   notify: restart docker
   ignore_errors: "{{ ansible_check_mode }}"
-  when: "docker_install_compose_plugin | bool == true and (ansible_version.full is version_compare('2.12', '<') or ansible_os_family not in ['RedHat', 'Debian'])"
+  when: "docker_install_compose_plugin | bool == true and (ansible_version.full is version_compare('2.12', '<') or ansible_facts.os_family not in ['RedHat', 'Debian'])"
 
 - name: Install docker-compose-plugin (with downgrade option).
   package:
     name: "{{ docker_compose_package }}"
-    state: "{{ docker_compose_package_state }}"
+    state: "{{ 'absent' if docker_uninstall else docker_compose_package_state }}"
     allow_downgrade: true
   notify: restart docker
   ignore_errors: "{{ ansible_check_mode }}"
-  when: "docker_install_compose_plugin | bool == true and ansible_version.full is version_compare('2.12', '>=') and ansible_os_family in ['RedHat', 'Debian']"
+  when: "docker_install_compose_plugin | bool == true and ansible_version.full is version_compare('2.12', '>=') and ansible_facts.os_family in ['RedHat', 'Debian']"
 
 - name: Ensure /etc/docker/ directory exists.
   file:
     path: /etc/docker
     state: directory
-    mode: 0755
-  when: docker_daemon_options.keys() | length > 0
+    mode: "0755"
+  when: docker_daemon_options.keys() | length > 0 and not (docker_uninstall | bool)
 
 - name: Configure Docker daemon options.
   copy:
     content: "{{ docker_daemon_options | to_nice_json }}"
     dest: /etc/docker/daemon.json
-    mode: 0644
-  when: docker_daemon_options.keys() | length > 0
+    mode: "0644"
+  when: docker_daemon_options.keys() | length > 0 and not (docker_uninstall | bool)
   notify: restart docker
 
 - name: Ensure Docker is started and enabled at boot.
   service:
     name: docker
-    state: "{{ docker_service_state }}"
-    enabled: "{{ docker_service_enabled }}"
-  ignore_errors: "{{ ansible_check_mode }}"
+    state: "{{ 'stopped' if docker_uninstall else docker_service_state }}"
+    enabled: "{{ false if docker_uninstall else docker_service_enabled }}"
+  ignore_errors: "{{ ansible_check_mode or docker_uninstall }}"
   when: docker_service_manage | bool
+
+- name: Remove Docker daemon configuration when uninstalling.
+  file:
+    path: /etc/docker/daemon.json
+    state: absent
+  when: docker_uninstall | bool
 
 - name: Ensure handlers are notified now to avoid firewall conflicts.
   meta: flush_handlers
 
 - include_tasks: docker-compose.yml
-  when: docker_install_compose | bool
+  when: docker_install_compose | bool and not (docker_uninstall | bool)
 
 - name: Get docker group info using getent.
   getent:
     database: group
     key: docker
     split: ':'
-  when: docker_users | length > 0
+  when: docker_users | length > 0 and not (docker_uninstall | bool)
 
 - name: Check if there are any users to add to the docker group.
   set_fact:
     at_least_one_user_to_modify: true
   when:
     - docker_users | length > 0
+    - ansible_facts.getent_group["docker"][2] is defined
     - item not in ansible_facts.getent_group["docker"][2]
+    - not (docker_uninstall | bool)
   with_items: "{{ docker_users }}"
 
 - include_tasks: docker-users.yml

@@ -3,7 +3,7 @@
 
 # Virtualization packages to install
 virtualization_packages:
-  - qemu-kvm
+  - qemu-system-x86
   - qemu-utils
   - libvirt-daemon-system
   - libvirt-clients

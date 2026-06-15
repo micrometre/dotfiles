@@ -1,8 +1,3 @@
-- name: Make sure we have a 'wheel' group
-  group:
-    name: wheel
-    state: present
-
 - name: Create a new regular user with sudo privileges
   user:
     name: "{{ item }}"
@@ -11,19 +6,234 @@
     append: true
     create_home: true
     shell: /bin/bash
-  with_items: "{{ create_users }}"
+    password: "{{ regular_user_password | password_hash('sha512') }}"
+    update_password: on_create
+  loop: "{{ create_users }}"
 
 - name: Set authorized key for remote user
-  authorized_key:
+  ansible.posix.authorized_key:
     user: "{{ item }}"
     state: present
     key: "{{ copy_local_key }}"
-  with_items: "{{ create_users }}"
+  loop: "{{ create_users }}"
   notify:
     - restart ssh
 
-- name: allow 'user dell' to have passwordless sudo
+- name: Allow passwordless sudo for created users
   lineinfile:
     dest: /etc/sudoers
-    line: 'dell ALL=(ALL) NOPASSWD: ALL'
+    line: '{{ item }} ALL=(ALL) NOPASSWD: ALL'
     validate: 'visudo -cf %s'
+  loop: "{{ create_users }}"
+  when: create_passwordless_sudo | default(false)
+
+- name: Create restricted user with basic access (no sudo)
+  user:
+    name: "{{ item }}"
+    state: present
+    groups: []
+    append: false
+    create_home: true
+    shell: /bin/bash
+    password: "{{ restricted_user_password | password_hash('sha512') }}"
+    update_password: on_create
+  loop: "{{ create_restricted_user }}"
+
+- name: Set authorized key for restricted user
+  ansible.posix.authorized_key:
+    user: "{{ item }}"
+    state: present
+    key: "{{ copy_local_key }}"
+  loop: "{{ create_restricted_user }}"
+  notify:
+    - restart ssh
+
+- name: Create restricted sudoers file to prevent sudo access
+  copy:
+    dest: "/etc/sudoers.d/restricted-users"
+    content: |
+      # Restricted users - no sudo access allowed
+      {% for user in create_restricted_user %}
+      {{ user }} ALL=(ALL) /usr/bin/passwd {{ user }}, /usr/bin/chsh {{ user }}
+      {% endfor %}
+    mode: '0440'
+    validate: 'visudo -cf %s'
+
+- name: Ensure restricted user home ownership and private permissions
+  file:
+    path: "/home/{{ item }}"
+    state: directory
+    mode: '0750'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ create_restricted_user }}"
+  when: create_restricted_user is defined
+
+- name: Ensure restricted user .ssh directory has correct permissions
+  file:
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ create_restricted_user }}"
+  when: create_restricted_user is defined
+
+- name: Create restricted user shell restrictions
+  lineinfile:
+    dest: "/home/{{ item }}/.profile"
+    line: "export PATH=/usr/local/bin:/usr/bin:/bin"
+    state: present
+    create: true
+    mode: '0644'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ create_restricted_user }}"
+  when: create_restricted_user is defined
+
+- name: Create restricted bashrc for security
+  copy:
+    dest: "/home/{{ item }}/.bashrc"
+    content: |
+      # Restricted user environment
+      # Only run for interactive shells. Non-interactive shells (such as the
+      # ones the GNOME/GDM session sources at login) must return early, or the
+      # exit below would kill the session and bounce back to the login screen.
+      case $- in
+        *i*) ;;
+        *) return;;
+      esac
+      export PATH=/usr/local/bin:/usr/bin:/bin
+      export PS1='[restricted@\h:\W]\$ '
+      alias sudo='echo "sudo access not allowed for user {{ item }}"'
+      alias su='echo "su not allowed for user {{ item }}"'
+      # Disable dangerous commands
+      alias rm='echo "rm command restricted - use rm -i"'
+      alias mv='echo "mv command restricted - use mv -i"'
+      alias cp='echo "cp command restricted - use cp -i"'
+      # History control
+      export HISTSIZE=100
+      export HISTCONTROL=ignoredups:erasedups
+      export HISTFILE=/home/{{ item }}/.bash_history
+      # Block interactive terminal emulators opened inside the desktop.
+      # Requires an attached tty so the GUI session itself is never affected.
+      if [ -n "$DISPLAY" ] && [ -t 0 ]; then
+        echo "Terminal access disabled for restricted user. Please use browser for ANPR uploads."
+        exit 1
+      fi
+    mode: '0644'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ create_restricted_user }}"
+  when: create_restricted_user is defined
+
+# Remove the previously-applied oversized limits. limits.conf treats
+# stack/fsize/memlock in KILOBYTES, so the old byte values produced a
+# ~16 GiB stack limit that made gdm-wayland-session fail to allocate and
+# bounced the GUI login back to the display manager (login loop).
+- name: Remove obsolete oversized limits for restricted users
+  lineinfile:
+    path: /etc/security/limits.conf
+    regexp: '^\s*{{ combined_item.0 }}\s+{{ combined_item.1.type }}\s+{{ combined_item.1.name }}\s'
+    state: absent
+  loop: "{{ create_restricted_user | product(obsolete_limits) | list }}"
+  loop_control:
+    loop_var: combined_item
+  vars:
+    obsolete_limits:
+      - { type: soft, name: stack }
+      - { type: hard, name: stack }
+      - { type: soft, name: fsize }
+      - { type: hard, name: fsize }
+      - { type: soft, name: memlock }
+      - { type: hard, name: memlock }
+  when: create_restricted_user is defined
+
+- name: Set sane resource limits for restricted users
+  pam_limits:
+    domain: "{{ combined_item.0 }}"
+    limit_type: "{{ combined_item.1.type }}"
+    limit_item: "{{ combined_item.1.name }}"
+    value: "{{ combined_item.1.value }}"
+  loop: "{{ create_restricted_user | product(limits) | list }}"
+  loop_control:
+    loop_var: combined_item
+  vars:
+    # Only file-descriptor and process caps. Stack/memlock/fsize are left at
+    # system defaults so the GNOME/Wayland session can start normally.
+    limits:
+      - { type: soft, name: nproc, value: 32768 }
+      - { type: hard, name: nproc, value: 65536 }
+      - { type: soft, name: nofile, value: 65536 }
+      - { type: hard, name: nofile, value: 131072 }
+  when: create_restricted_user is defined
+
+- name: Restrict login for restricted users (requires pam_access enabled in PAM)
+  blockinfile:
+    path: "/etc/security/access.conf"
+    create: true
+    mode: '0644'
+    owner: root
+    group: root
+    marker: "# {mark} ANSIBLE MANAGED - restricted user {{ item }}"
+    block: |
+      # Allow local console/tty login only, deny everything else
+      +:{{ item }}:LOCAL
+      -:{{ item }}:ALL
+  loop: "{{ create_restricted_user }}"
+  when: create_restricted_user is defined
+
+# Auto-login: only a single user can be the default. We use the first
+# entry in create_restricted_user as the auto-login (kiosk) account.
+- name: Check whether GDM3 is installed (graphical auto-login)
+  stat:
+    path: /etc/gdm3/custom.conf
+  register: gdm3_custom_conf
+  when:
+    - create_restricted_user | length > 0
+    - autologin_enabled | default(false)
+
+- name: Enable GDM3 graphical auto-login for the restricted user
+  community.general.ini_file:
+    path: /etc/gdm3/custom.conf
+    section: daemon
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: '0644'
+    owner: root
+    group: root
+    no_extra_spaces: true
+  loop:
+    - { option: AutomaticLoginEnable, value: "true" }
+    - { option: AutomaticLogin, value: "{{ create_restricted_user[0] }}" }
+  when:
+    - create_restricted_user | length > 0
+    - autologin_enabled | default(false)
+    - gdm3_custom_conf.stat is defined
+    - gdm3_custom_conf.stat.exists | default(false)
+
+- name: Create getty override directory for console auto-login on tty1
+  file:
+    path: /etc/systemd/system/getty@tty1.service.d
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  when:
+    - create_restricted_user | length > 0
+    - autologin_enabled | default(false)
+
+- name: Configure console auto-login for the restricted user on tty1
+  copy:
+    dest: /etc/systemd/system/getty@tty1.service.d/override.conf
+    mode: '0644'
+    owner: root
+    group: root
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=-/sbin/agetty --autologin {{ create_restricted_user[0] }} --noclear %I $TERM
+  when:
+    - create_restricted_user | length > 0
+    - autologin_enabled | default(false)
+  notify: daemon-reload

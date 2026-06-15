@@ -1,0 +1,111 @@
+---
+# Main tasks for dart-flutter role
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+
+- name: Install dependencies
+  apt:
+    name: "{{ flutter_dependencies }}"
+    state: present
+  become: true
+  when: not (flutter_uninstall | bool)
+
+- name: Install Flutter via snap
+  snap:
+    name: flutter
+    classic: "{{ flutter_snap_classic }}"
+    state: "{{ 'absent' if flutter_uninstall else 'present' }}"
+  become: true
+
+- name: Install Dart via snap
+  snap:
+    name: dart
+    classic: true
+    state: "{{ 'absent' if flutter_uninstall else 'present' }}"
+  become: true
+
+- name: Get Flutter installation directory
+  shell: which flutter
+  register: flutter_path_output
+  changed_when: false
+  when: not (flutter_uninstall | bool)
+
+- name: Verify flutter is accessible
+  shell: flutter --version
+  register: flutter_version_output
+  changed_when: false
+  when: not (flutter_uninstall | bool)
+
+- name: Run flutter doctor to check environment
+  shell: flutter doctor
+  register: flutter_doctor_output
+  changed_when: false
+  ignore_errors: true
+  when: not (flutter_uninstall | bool)
+
+- name: Configure Flutter analytics
+  shell: |
+    {% if flutter_analytics_enabled %}
+    flutter config --enable-analytics
+    {% else %}
+    flutter config --disable-analytics
+    {% endif %}
+  ignore_errors: true
+  when: not (flutter_uninstall | bool)
+
+- name: Precache Flutter artifacts
+  shell: flutter precache
+  ignore_errors: true
+  timeout: 600
+  when: not (flutter_uninstall | bool)
+
+- name: Display Flutter installation summary
+  debug:
+    msg: |
+      ========================================
+      Dart/Flutter Setup Complete!
+      ========================================
+      
+      Installation Method: Snap
+      
+      Flutter and Dart are now installed system-wide via snap.
+      
+      Quick Start:
+        flutter create my_app
+        cd my_app
+        flutter run
+      
+      Verify installation:
+        flutter doctor
+        dart --version
+      
+      IDE Support:
+        VSCode: Install Flutter & Dart extensions
+        Android Studio: Install Flutter plugin
+      
+      Linux Desktop Development:
+        If targeting Linux, ensure dependencies are installed:
+        - GCC/G++ (via build-essential) ✓
+        - libgtk-3-dev ✓
+        - mesa-utils ✓
+      
+      Next Steps:
+        1. Run: flutter doctor -v (to see detailed information)
+        2. Install Android Studio for mobile development
+        3. Create your first Flutter app
+      
+      ========================================
+      
+      Flutter Version:
+      {{ flutter_version_output.stdout }}
+      
+      Flutter Location:
+      {{ flutter_path_output.stdout }}
+      
+      Flutter Doctor Output:
+      {{ flutter_doctor_output.stdout }}
+  when: verify_installation and not (flutter_uninstall | bool)

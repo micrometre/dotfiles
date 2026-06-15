@@ -1,58 +1,90 @@
 
-- name: Install required packages
-  package:
-    name:
-      - vim
-  become: yes
-  tags:
-    - install_packages
+- block:
+    - name: Install required packages
+      package:
+        name:
+          - vim
+        state: present
+      become: yes
+      tags:
+        - install_packages
 
-  
-- name: Ensure .vim/{autoload,bundle} directory exists
-  file:
-    path: "{{ item }}"
-    state: directory
-    recurse: no
-    mode: 0750
-  loop:
-    - "{{ vim_dir }}"
-    - "{{ vim_dir }}/autoload"
-    - "{{ vim_dir }}/bundle"
+    - name: Ensure .vim/{autoload,bundle} directory exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        recurse: no
+        mode: 0750
+      loop:
+        - "{{ vim_dir }}"
+        - "{{ vim_dir }}/autoload"
+        - "{{ vim_dir }}/bundle"
 
-- name: Ensure Pathogen is in place
-  get_url:
-    dest: "{{ vim_dir }}/autoload/pathogen.vim"
-    url: https://tpo.pe/pathogen.vim
+    - name: Ensure Pathogen is in place
+      get_url:
+        dest: "{{ vim_dir }}/autoload/pathogen.vim"
+        url: https://tpo.pe/pathogen.vim
 
+    - name: Ensure .vimrc config in place
+      copy:
+        src: vimrc
+        dest: "{{ vimrc }}"
+        backup: yes
+        mode: 0640
 
-- name: Ensure .vimrc config in place
-  copy:
-    src: vimrc
-    dest: "{{ vimrc }}"
-    backup: yes
-    mode: 0640    
+    - name: get inputrc file
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.inputrc
+        dest: /home/{{ ansible_ssh_user }}/.inputrc
+        owner: "{{ ansible_ssh_user }}"
+        mode: 0640
+      become: yes
 
-- name: get inputrc file 
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.inputrc
-    dest: /home/{{ ansible_ssh_user }}/.inputrc
-    owner: "{{ ansible_ssh_user }}"
-    mode: 0640
-  become: yes
+    - name: get bash_aliases file
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.bash_aliases
+        dest: /home/{{ ansible_ssh_user }}/.bash_aliases
+        owner: "{{ ansible_ssh_user }}"
+        mode: 0640
+      become: yes
 
-    
-- name: get bash_aliases file 
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.bash_aliases
-    dest: /home/{{ ansible_ssh_user }}/.bash_aliases
-    owner: "{{ ansible_ssh_user }}"
-    mode: 0640
-  become: yes
+    - name: write git config
+      template:
+        src: gitconfig.j2
+        dest: /home/{{ ansible_ssh_user }}/.gitconfig
+        owner: "{{ ansible_ssh_user }}"
+        mode: 0640
+      become: yes
+  when: not (dotfiles_uninstall | bool)
 
-- name: write  git config
-  template:
-    src: gitconfig.j2
-    dest: /home/{{ ansible_ssh_user }}/.gitconfig
-    owner: "{{ ansible_ssh_user }}"
-    mode: 0640
-  become: yes
+- block:
+    - name: Remove dotfiles directory
+      file:
+        path: "{{ ansible_env.HOME }}/.vim"
+        state: absent
+      become: yes
+
+    - name: Remove vimrc file
+      file:
+        path: "{{ ansible_env.HOME }}/.vimrc"
+        state: absent
+      become: yes
+
+    - name: Remove inputrc file
+      file:
+        path: "{{ ansible_env.HOME }}/.inputrc"
+        state: absent
+      become: yes
+
+    - name: Remove bash_aliases file
+      file:
+        path: "{{ ansible_env.HOME }}/.bash_aliases"
+        state: absent
+      become: yes
+
+    - name: Remove .gitconfig file
+      file:
+        path: "/home/{{ ansible_ssh_user }}/.gitconfig"
+        state: absent
+      become: yes
+  when: dotfiles_uninstall | bool

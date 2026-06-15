@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+# Jails for nginx running in Docker; logpath must match host bind mounts (fastapi-config/nginx/logs).
+
+{% if fail2ban_nginx_http_auth_enabled | bool %}
+[nginx-http-auth]
+enabled = true
+port = http,https
+logpath = {{ fail2ban_nginx_error_log }}
+filter = nginx-http-auth
+maxretry = {{ fail2ban_nginx_http_auth_maxretry }}
+findtime = {{ fail2ban_nginx_findtime }}
+bantime = {{ fail2ban_nginx_bantime }}
+
+{% endif %}
+{% if fail2ban_nginx_botsearch_enabled | bool %}
+[nginx-botsearch]
+enabled = true
+port = http,https
+logpath = {{ fail2ban_nginx_error_log }} {{ fail2ban_nginx_access_log }}
+filter = nginx-botsearch
+maxretry = {{ fail2ban_nginx_botsearch_maxretry }}
+findtime = {{ fail2ban_nginx_findtime }}
+bantime = {{ fail2ban_nginx_bantime }}
+
+{% endif %}

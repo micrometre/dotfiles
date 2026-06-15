@@ -1,0 +1,69 @@
+---
+# Default variables for Android Development role
+
+# Android SDK paths
+android_home: "{{ ansible_env.HOME }}/Android/Sdk"
+android_cmdline_tools_version: "11076708"
+android_cmdline_tools_url: "https://dl.google.com/android/repository/commandlinetools-linux-{{ android_cmdline_tools_version }}_latest.zip"
+
+# SDK platforms and build tools to install
+android_platforms:
+  - "platform-tools"
+  - "platforms;android-35"
+  - "platforms;android-34"
+  - "build-tools;35.0.0"
+  - "build-tools;34.0.0"
+  - "emulator"
+  - "system-images;android-35;google_apis;x86_64"
+
+# Base dependencies
+android_base_packages:
+  - curl
+  - wget
+  - git
+  - unzip
+  - zip
+  - openjdk-17-jdk
+  - openjdk-17-jre
+  - libglu1-mesa
+  - libpulse0
+  - libasound2t64
+  - libfontconfig1
+  - libxrender1
+  - libxtst6
+  - libxi6
+  - libfreetype6
+  - libxft2
+  - libxrandr2
+  - libxss1
+  - libxcursor1
+  - libxfixes3
+  - libxdamage1
+  - libxcomposite1
+  - libgtk-3-0
+  - libnss3
+  - libgbm1
+  - qemu-system-x86
+  - libvirt-daemon-system
+  - libvirt-clients
+  - bridge-utils
+  - cmake
+  - ninja-build
+  - pkg-config
+  - libblkid-dev
+  - liblzma-dev
+
+# Snap packages
+android_snap_packages:
+  - kotlin
+  - gradle
+
+# Java home
+java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
+
+# Enable KVM acceleration
+enable_kvm: true
+android_uninstall: false
+
+# Verify installation
+verify_installation: true

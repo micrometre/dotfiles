@@ -1,0 +1,219 @@
+---
+# Main tasks for android-dev role
+
+- block:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      become: true
+
+    - name: Install base dependencies
+      apt:
+        name: "{{ android_base_packages }}"
+        state: present
+      become: true
+
+    - name: Install Kotlin via snap
+      snap:
+        name: kotlin
+        classic: true
+        state: present
+      become: true
+      ignore_errors: true
+
+    - name: Install Gradle via snap
+      snap:
+        name: gradle
+        classic: true
+        state: present
+      become: true
+      ignore_errors: true
+
+    - name: Set Java 17 as default
+      alternatives:
+        name: "{{ item }}"
+        path: "{{ java_home }}/bin/{{ item }}"
+      loop:
+        - java
+        - javac
+      become: true
+      ignore_errors: true
+
+    - name: Add user to kvm group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: kvm
+        append: true
+      become: true
+
+    - name: Add user to libvirt group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: libvirt
+        append: true
+      become: true
+
+    - name: Check if KVM udev rules exist
+      stat:
+        path: /etc/udev/rules.d/99-kvm.rules
+      register: kvm_rules_stat
+      become: true
+
+    - name: Create KVM udev rules
+      copy:
+        content: 'SUBSYSTEM=="misc", KERNEL=="kvm", GROUP="kvm", MODE="0660"'
+        dest: /etc/udev/rules.d/99-kvm.rules
+        mode: '0644'
+      become: true
+      notify: reload udev
+      when: not kvm_rules_stat.stat.exists
+
+    - name: Create Android SDK directories
+      file:
+        path: "{{ android_home }}/cmdline-tools"
+        state: directory
+        mode: '0755'
+
+    - name: Check if command line tools already installed
+      stat:
+        path: "{{ android_home }}/cmdline-tools/latest"
+      register: cmdline_tools_stat
+
+    - name: Download Android SDK command line tools
+      get_url:
+        url: "{{ android_cmdline_tools_url }}"
+        dest: "/tmp/commandlinetools-linux-{{ android_cmdline_tools_version }}_latest.zip"
+        mode: '0755'
+      when: not cmdline_tools_stat.stat.exists
+
+    - name: Extract command line tools
+      unarchive:
+        src: "/tmp/commandlinetools-linux-{{ android_cmdline_tools_version }}_latest.zip"
+        dest: "{{ android_home }}/cmdline-tools"
+        remote_src: true
+      when: not cmdline_tools_stat.stat.exists
+
+    - name: Rename extracted cmdline-tools to latest
+      shell: |
+        if [ -d "{{ android_home }}/cmdline-tools/cmdline-tools" ]; then
+          mv "{{ android_home }}/cmdline-tools/cmdline-tools" "{{ android_home }}/cmdline-tools/latest"
+        fi
+      when: not cmdline_tools_stat.stat.exists
+
+    - name: Cleanup downloaded zip
+      file:
+        path: "/tmp/commandlinetools-linux-{{ android_cmdline_tools_version }}_latest.zip"
+        state: absent
+
+    - name: Accept Android SDK licenses
+      shell: |
+        yes | "{{ android_home }}/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+      environment:
+        ANDROID_HOME: "{{ android_home }}"
+
+    - name: Install Android SDK platforms and tools
+      shell: |
+        "{{ android_home }}/cmdline-tools/latest/bin/sdkmanager" {{ android_platforms | join(' ') }}
+      environment:
+        ANDROID_HOME: "{{ android_home }}"
+
+    - name: Check if profile exists
+      stat:
+        path: "{{ ansible_env.HOME }}/.profile"
+      register: profile_stat
+
+    - name: Create profile if not exists
+      file:
+        path: "{{ ansible_env.HOME }}/.profile"
+        state: touch
+        mode: '0644'
+      when: not profile_stat.stat.exists
+
+    - name: Add Android SDK environment variables to profile
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.profile"
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "# Android SDK"
+        - "export ANDROID_HOME={{ ansible_env.HOME }}/Android/Sdk"
+        - 'export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH'
+        - 'export PATH=$ANDROID_HOME/platform-tools:$PATH'
+        - 'export PATH=$ANDROID_HOME/emulator:$PATH'
+        - 'export PATH=$ANDROID_HOME/build-tools/35.0.0:$PATH'
+        - "export JAVA_HOME={{ java_home }}"
+        - 'export PATH=$JAVA_HOME/bin:$PATH'
+
+    - name: Copy USB debugging udev rules
+      copy:
+        src: 51-android.rules
+        dest: /etc/udev/rules.d/51-android.rules
+        mode: '0644'
+      become: true
+      notify: reload udev
+
+    - name: Add user to plugdev group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: plugdev
+        append: true
+      become: true
+      ignore_errors: true
+  when: not (android_uninstall | bool)
+
+- name: Remove Android SDK environment from profile
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.profile"
+    line: "{{ item }}"
+    state: absent
+  loop:
+    - "# Android SDK"
+    - "export ANDROID_HOME={{ ansible_env.HOME }}/Android/Sdk"
+    - 'export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH'
+    - 'export PATH=$ANDROID_HOME/platform-tools:$PATH'
+    - 'export PATH=$ANDROID_HOME/emulator:$PATH'
+    - 'export PATH=$ANDROID_HOME/build-tools/35.0.0:$PATH'
+    - "export JAVA_HOME={{ java_home }}"
+    - 'export PATH=$JAVA_HOME/bin:$PATH'
+  when: android_uninstall | bool
+
+- name: Remove Android SDK directory
+  file:
+    path: "{{ android_home }}"
+    state: absent
+  when: android_uninstall | bool
+
+- name: Remove Android udev rules
+  file:
+    path: /etc/udev/rules.d/51-android.rules
+    state: absent
+  become: true
+  when: android_uninstall | bool
+
+- name: Remove KVM udev rules
+  file:
+    path: /etc/udev/rules.d/99-kvm.rules
+    state: absent
+  become: true
+  when: android_uninstall | bool
+
+- name: Display installation complete message
+  debug:
+    msg: |
+      ========================================
+      Android Development Environment Setup Complete!
+      ========================================
+      
+      Java Home: {{ java_home }}
+      Android SDK: {{ android_home }}
+      
+      Next steps:
+      1. Run: source {{ ansible_env.HOME }}/.profile
+      2. Launch Android Studio: snap run android-studio
+      3. Create an AVD via Android Studio
+      
+      Note: If you were just added to KVM/Libvirt groups,
+      please LOG OUT and LOG BACK IN for emulator acceleration.
+      ========================================
+  when: verify_installation and not (android_uninstall | bool)

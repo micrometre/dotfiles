@@ -1,0 +1,40 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+
+- name: Install avahi-daemon
+  apt:
+    name: avahi-daemon
+    state: present
+
+- name: Set hostname
+  hostname:
+    name: "{{ host_names[0] | regex_replace('\\.local$', '') }}"
+
+- name: Add both hostnames to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    regexp: '127\.0\.1\.1.*'
+    line: '127.0.1.1 {{ host_names | join(" ") }}'
+    state: present
+
+- name: Enable avahi-daemon
+  service:
+    name: avahi-daemon
+    enabled: yes
+
+- name: Restart avahi-daemon
+  service:
+    name: avahi-daemon
+    state: restarted
+
+- name: Configure cloud.cfg to preserve hostname
+  lineinfile:
+    path: /etc/cloud/cloud.cfg
+    regexp: '^preserve_hostname:'
+    line: 'preserve_hostname: true'

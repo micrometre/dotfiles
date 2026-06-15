@@ -19,7 +19,7 @@ ssh_gss_api_authentication: "no"
 ssh_x11_forwarding: "no"
 
 # SSH access control
-ssh_allowed_users: ["ubuntu"]
+ssh_allowed_users: []
 ssh_allowed_groups: []
 
 # Sudoers configuration

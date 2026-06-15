@@ -1,0 +1,4 @@
+---
+# Default variables for dotfiles role
+
+dotfiles_uninstall: false

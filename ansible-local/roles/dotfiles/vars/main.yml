@@ -1,4 +1,4 @@
 ---
-vim_dir: "{{ ansible_env.HOME }}/.vim"
+vim_dir: "{{ '~/.vim' | expanduser }}"
 vimrc: "{{ ansible_env.HOME }}/.vimrc"
 sys_packages: [ "vim"]
