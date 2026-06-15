@@ -42,14 +42,14 @@
 
     - name: Add user to kvm group
       user:
-        name: "{{ ansible_user_id }}"
+        name: "{{ configure_user | default(ansible_user) }}"
         groups: kvm
         append: true
       become: true
 
     - name: Add user to libvirt group
       user:
-        name: "{{ ansible_user_id }}"
+        name: "{{ configure_user | default(ansible_user) }}"
         groups: libvirt
         append: true
       become: true
@@ -74,6 +74,9 @@
         path: "{{ android_home }}/cmdline-tools"
         state: directory
         mode: '0755'
+        owner: "{{ configure_user | default(ansible_user) }}"
+        group: "{{ configure_user | default(ansible_user) }}"
+        recurse: true
 
     - name: Check if command line tools already installed
       stat:
@@ -113,37 +116,45 @@
         ANDROID_HOME: "{{ android_home }}"
 
     - name: Install Android SDK platforms and tools
-      shell: |
-        "{{ android_home }}/cmdline-tools/latest/bin/sdkmanager" {{ android_platforms | join(' ') }}
+      ansible.builtin.command:
+        argv: "{{ [android_home ~ '/cmdline-tools/latest/bin/sdkmanager'] + android_platforms }}"
       environment:
         ANDROID_HOME: "{{ android_home }}"
 
     - name: Check if profile exists
       stat:
-        path: "{{ ansible_env.HOME }}/.profile"
+        path: "{{ configure_user_home }}/.profile"
       register: profile_stat
 
     - name: Create profile if not exists
       file:
-        path: "{{ ansible_env.HOME }}/.profile"
+        path: "{{ configure_user_home }}/.profile"
         state: touch
         mode: '0644'
+        owner: "{{ configure_user | default(ansible_user) }}"
+        group: "{{ configure_user | default(ansible_user) }}"
       when: not profile_stat.stat.exists
 
     - name: Add Android SDK environment variables to profile
       lineinfile:
-        path: "{{ ansible_env.HOME }}/.profile"
+        path: "{{ configure_user_home }}/.profile"
         line: "{{ item }}"
         state: present
       loop:
         - "# Android SDK"
-        - "export ANDROID_HOME={{ ansible_env.HOME }}/Android/Sdk"
+        - "export ANDROID_HOME={{ android_home }}"
         - 'export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH'
         - 'export PATH=$ANDROID_HOME/platform-tools:$PATH'
         - 'export PATH=$ANDROID_HOME/emulator:$PATH'
-        - 'export PATH=$ANDROID_HOME/build-tools/35.0.0:$PATH'
         - "export JAVA_HOME={{ java_home }}"
         - 'export PATH=$JAVA_HOME/bin:$PATH'
+
+    - name: Add Android SDK build-tools to profile PATH
+      lineinfile:
+        path: "{{ configure_user_home }}/.profile"
+        line: 'export PATH=$ANDROID_HOME/build-tools/{{ item }}:$PATH'
+        state: present
+      loop: "{{ android_profile_build_tools }}"
 
     - name: Copy USB debugging udev rules
       copy:
@@ -155,25 +166,32 @@
 
     - name: Add user to plugdev group
       user:
-        name: "{{ ansible_user_id }}"
+        name: "{{ configure_user | default(ansible_user) }}"
         groups: plugdev
         append: true
       become: true
       ignore_errors: true
   when: not (android_uninstall | bool)
 
+- name: Remove Android SDK build-tools from profile PATH
+  lineinfile:
+    path: "{{ configure_user_home }}/.profile"
+    line: 'export PATH=$ANDROID_HOME/build-tools/{{ item }}:$PATH'
+    state: absent
+  loop: "{{ android_profile_build_tools }}"
+  when: android_uninstall | bool
+
 - name: Remove Android SDK environment from profile
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.profile"
+    path: "{{ configure_user_home }}/.profile"
     line: "{{ item }}"
     state: absent
   loop:
     - "# Android SDK"
-    - "export ANDROID_HOME={{ ansible_env.HOME }}/Android/Sdk"
+    - "export ANDROID_HOME={{ android_home }}"
     - 'export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH'
     - 'export PATH=$ANDROID_HOME/platform-tools:$PATH'
     - 'export PATH=$ANDROID_HOME/emulator:$PATH'
-    - 'export PATH=$ANDROID_HOME/build-tools/35.0.0:$PATH'
     - "export JAVA_HOME={{ java_home }}"
     - 'export PATH=$JAVA_HOME/bin:$PATH'
   when: android_uninstall | bool
@@ -209,7 +227,7 @@
       Android SDK: {{ android_home }}
       
       Next steps:
-      1. Run: source {{ ansible_env.HOME }}/.profile
+      1. Run: source {{ configure_user_home }}/.profile
       2. Launch Android Studio: snap run android-studio
       3. Create an AVD via Android Studio
       

@@ -35,24 +35,24 @@
     - name: get inputrc file
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.inputrc
-        dest: /home/{{ ansible_ssh_user }}/.inputrc
-        owner: "{{ ansible_ssh_user }}"
+        dest: "/home/{{ configure_user | default(ansible_user) }}/.inputrc"
+        owner: "{{ configure_user | default(ansible_user) }}"
         mode: 0640
       become: yes
 
     - name: get bash_aliases file
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/micrometre/dotfiles/master/files/.bash_aliases
-        dest: /home/{{ ansible_ssh_user }}/.bash_aliases
-        owner: "{{ ansible_ssh_user }}"
+        dest: "/home/{{ configure_user | default(ansible_user) }}/.bash_aliases"
+        owner: "{{ configure_user | default(ansible_user) }}"
         mode: 0640
       become: yes
 
     - name: write git config
       template:
         src: gitconfig.j2
-        dest: /home/{{ ansible_ssh_user }}/.gitconfig
-        owner: "{{ ansible_ssh_user }}"
+        dest: "/home/{{ configure_user | default(ansible_user) }}/.gitconfig"
+        owner: "{{ configure_user | default(ansible_user) }}"
         mode: 0640
       become: yes
   when: not (dotfiles_uninstall | bool)
@@ -84,7 +84,7 @@
 
     - name: Remove .gitconfig file
       file:
-        path: "/home/{{ ansible_ssh_user }}/.gitconfig"
+        path: "/home/{{ configure_user | default(ansible_user) }}/.gitconfig"
         state: absent
       become: yes
   when: dotfiles_uninstall | bool

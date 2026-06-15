@@ -21,13 +21,6 @@
     state: "{{ 'absent' if flutter_uninstall else 'present' }}"
   become: true
 
-- name: Install Dart via snap
-  snap:
-    name: dart
-    classic: true
-    state: "{{ 'absent' if flutter_uninstall else 'present' }}"
-  become: true
-
 - name: Get Flutter installation directory
   shell: which flutter
   register: flutter_path_output
@@ -37,6 +30,12 @@
 - name: Verify flutter is accessible
   shell: flutter --version
   register: flutter_version_output
+  changed_when: false
+  when: not (flutter_uninstall | bool)
+
+- name: Verify dart is accessible
+  shell: dart --version
+  register: dart_version_output
   changed_when: false
   when: not (flutter_uninstall | bool)
 
@@ -70,9 +69,9 @@
       Dart/Flutter Setup Complete!
       ========================================
       
-      Installation Method: Snap
+      Installation Method: Snap (Flutter snap includes the Dart SDK)
       
-      Flutter and Dart are now installed system-wide via snap.
+      Flutter and Dart are installed system-wide via the flutter snap.
       
       Quick Start:
         flutter create my_app
@@ -102,6 +101,9 @@
       
       Flutter Version:
       {{ flutter_version_output.stdout }}
+
+      Dart Version:
+      {{ dart_version_output.stdout }}
       
       Flutter Location:
       {{ flutter_path_output.stdout }}

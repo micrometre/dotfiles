@@ -1,0 +1,65 @@
+---
+# Main tasks for android-studio role
+
+- block:
+    - name: Ensure install directory exists
+      file:
+        path: "{{ android_studio_install_dir }}"
+        state: directory
+        mode: '0755'
+      become: true
+
+    - name: Check if Android Studio is already installed
+      stat:
+        path: "{{ android_studio_install_dir }}/android-studio/bin/studio.sh"
+      register: android_studio_stat
+
+    - name: Download Android Studio
+      get_url:
+        url: "{{ android_studio_tar_url }}"
+        dest: "/tmp/android-studio.tar.gz"
+        mode: '0644'
+      when: not android_studio_stat.stat.exists
+
+    - name: Extract Android Studio
+      unarchive:
+        src: "/tmp/android-studio.tar.gz"
+        dest: "{{ android_studio_install_dir }}"
+        remote_src: true
+        creates: "{{ android_studio_install_dir }}/android-studio"
+      become: true
+      when: not android_studio_stat.stat.exists
+
+    - name: Cleanup downloaded tarball
+      file:
+        path: "/tmp/android-studio.tar.gz"
+        state: absent
+
+    - name: Create desktop entry
+      copy:
+        dest: /usr/share/applications/android-studio.desktop
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Android Studio
+          Exec="{{ android_studio_install_dir }}/android-studio/bin/studio.sh" %f
+          Icon={{ android_studio_install_dir }}/android-studio/bin/studio.svg
+          Categories=Development;IDE;
+          Terminal=false
+          StartupNotify=true
+          StartupWMClass=jetbrains-studio
+        mode: '0644'
+      become: true
+
+  when: not (android_studio_uninstall | default(false) | bool)
+
+- name: Remove Android Studio
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ android_studio_install_dir }}/android-studio"
+    - /usr/share/applications/android-studio.desktop
+  become: true
+  when: android_studio_uninstall | default(false) | bool

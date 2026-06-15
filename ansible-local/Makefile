@@ -1,4 +1,4 @@
-.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_dart_flutter uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_dart_flutter ssh-agent 
+.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_android_studio configure_dart_flutter uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_android_studio uninstall_dart_flutter ssh-agent 
 
 help:
 	@echo "Ansible Infrastructure Management"
@@ -9,6 +9,7 @@ help:
 	@echo "  configure_python       - Install and configure Python"
 	@echo "  configure_dotfiles     - Install dotfiles and Vim config"
 	@echo "  configure_android_dev  - Configure Android development environment"
+	@echo "  configure_android_studio - Install Android Studio"
 	@echo "  configure_dart_flutter - Configure Dart/Flutter via snap"
 	@echo "  configure_docker       - Configure Docker"
 	@echo "  configure_virtualization - Configure virtualization support"
@@ -18,6 +19,7 @@ help:
 	@echo "  uninstall_dotfiles     - Remove dotfiles and Vim config"
 	@echo "  uninstall_docker       - Remove Docker packages and config"
 	@echo "  uninstall_android_dev  - Remove Android development environment"
+	@echo "  uninstall_android_studio - Remove Android Studio"
 	@echo "  uninstall_dart_flutter - Remove Dart and Flutter snaps"
 	@echo "  ssh_agent              - Start SSH agent and add SSH key"
 	@echo "Quick Start:"
@@ -82,6 +84,12 @@ configure_android_dev:
 	@echo ""
 	@echo "✅ ${HOST_NAME} configured with Android Development!"
 
+configure_android_studio:
+	@echo "Installing Android Studio on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags android-studio
+	@echo ""
+	@echo "✅ ${HOST_NAME} installed with Android Studio!"
+
 configure_dart_flutter:
 	@echo "Configuring Dart/Flutter on ${HOST_NAME}..."
 	ansible-playbook playbooks/configure.yml --tags dart-flutter
@@ -117,6 +125,12 @@ uninstall_android_dev:
 	ansible-playbook playbooks/configure.yml --tags android-dev -e android_uninstall=true
 	@echo ""
 	@echo "✅ ${HOST_NAME} removed Android development environment!"
+
+uninstall_android_studio:
+	@echo "Removing Android Studio on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags android-studio -e android_studio_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} removed Android Studio!"
 
 uninstall_dart_flutter:
 	@echo "Removing Dart/Flutter on ${HOST_NAME}..."

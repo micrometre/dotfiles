@@ -99,8 +99,8 @@
 
     - name: Create profile file if it does not exist
       ansible.builtin.file:
-        group: "{{ ansible_become_user | default(ansible_user) }}"
-        owner: "{{ ansible_become_user | default(ansible_user) }}"
+        group: "{{ configure_user | default(ansible_user) }}"
+        owner: "{{ configure_user | default(ansible_user) }}"
         mode: 0777
         path: "{{ nvm_profile }}"
         state: touch
@@ -138,8 +138,8 @@
 
       - name: Create nvm_dir if it does not exist
         ansible.builtin.file:
-          group: "{{ ansible_become_user | default(ansible_user) }}"
-          owner: "{{ ansible_become_user | default(ansible_user) }}"
+          group: "{{ configure_user | default(ansible_user) }}"
+          owner: "{{ configure_user | default(ansible_user) }}"
           mode: 0775
           path: "{{ nvm_dir }}"
           state: directory
@@ -159,8 +159,8 @@
 
       - name: Update profile permissions to lock it down after writing
         ansible.builtin.file:
-          group: "{{ ansible_become_user | default(ansible_user) }}"
-          owner: "{{ ansible_become_user | default(ansible_user) }}"
+          group: "{{ configure_user | default(ansible_user) }}"
+          owner: "{{ configure_user | default(ansible_user) }}"
           mode: 0644
           path: "{{ nvm_profile }}"
         become: true

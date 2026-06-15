@@ -3,6 +3,11 @@
   hosts: localhost
   become: true
   gather_facts: true
+
+  # User-scoped roles run as ansible_user from inventory (ubuntu)
+  vars:
+    configure_user: "{{ ansible_user }}"
+    configure_user_home: "/home/{{ ansible_user }}"
   
   roles:
     - { role: common, tags: ["common", "setup"] }
@@ -13,7 +18,8 @@
     - { role: virtualization, tags: ["virtualization", "setup"], become: false }
     - { role: vm-manager, tags: ["vm-manager", "setup"] }
     - { role: android-dev, tags: ["android-dev", "setup"], become: false }
-    - { role: dart-flutter, tags: ["dart-flutter", "setup"] }
+    - { role: android-studio, tags: ["android-studio", "setup"], become: false }
+    - { role: dart-flutter, tags: ["dart-flutter", "setup"], become: false }
   
   post_tasks:
     - name: Display configuration status

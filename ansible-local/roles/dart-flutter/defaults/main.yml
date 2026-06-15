@@ -10,7 +10,7 @@ flutter_uninstall: false
 flutter_repo_url: "https://github.com/flutter/flutter.git"
 flutter_channel: "stable"  # Options: stable, beta, dev, master
 
-# Dart configuration
+# Dart is bundled with the Flutter snap (no standalone dart snap exists)
 dart_sdk_version: "latest"
 
 # Dependencies
