@@ -1,76 +1,23 @@
-set nocompatible
-filetype indent plugin on
+execute pathogen#infect()
 syntax on
-set hidden
-set confirm
-set wildmenu
-set showcmd
-set hlsearch
-set ignorecase
-set smartcase
-set backspace=indent,eol,start
-set autoindent
-set nostartofline
-set ruler
+filetype plugin indent on
+
+colo darkblue
+
+" Configuration vim Airline
 set laststatus=2
-set confirm
-set visualbell
-set t_vb=
-set mouse=a
-set cmdheight=2
-set number
-set notimeout ttimeout ttimeoutlen=200
-set shiftwidth=4
-set softtabstop=4
-set expandtab
-set showmatch		" Show matching brackets.
-set ignorecase		" Do case insensitive matching
-set smartcase		" Do smart case matching
-set incsearch		" Incremental search
-set autowrite		" Automatically save before commands like :next and :make
-set ruler
-set confirm
 
+let g:airline#extensions#tabline#enabled=1
+let g:airline_powerline_fonts=1
 
+" Configuration NERDTree
+map <F5> :NERDTreeToggle<CR>
 
-"Shifting_blocks_visually
-vnoremap > >gv
-vnoremap < <gv
-"completions
-   inoremap ( ()<Esc>i
-   inoremap [ []<Esc>i
-   inoremap " ""<Esc>i
-   inoremap ' ''<Esc>i
-   inoremap { {}<Esc>i
+" Configuration floaterm
+let g:floaterm_keymap_toggle = '<F12>'
+let g:floaterm_width = 0.9
+let g:floaterm_height = 0.9
 
-"togle paste
-set pastetoggle=<F2>
-"continue from last postion
-if has("autocmd")
-  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-endif
-au BufNewFile,BufRead *.ejs set filetype=html
-
-"vim latex
-let g:livepreview_previewer = 'evince'
-"let g:livepreview_engine = 'xelatex'
-"vim-airline confs
-let g:airline#extensions#tabline#enabled = 1
-"remap the default emmet leader:
-let g:user_emmet_leader_key=','
-
-
-call plug#begin()
-Plug 'gergap/vim-ollama'
-Plug 'preservim/nerdtree'
-Plug 'w0rp/ale'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.htmlPrettierAsync
-call plug#end()
-
-" Source vim-ollama configuration
-if filereadable(expand('~/.vim/config/ollama.vim'))
-    source ~/.vim/config/ollama.vim
-endif
+" Configuration Vim.FZF
+let g:fzf_preview_window = 'right:50%'
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6  }  }

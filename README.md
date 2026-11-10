@@ -45,123 +45,151 @@ A comprehensive collection of configuration files, automation scripts, and Ansib
 
 ```bash
 # Clone the repository
-git clone https://github.com/micrometre/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/micrometre/dotfiles.git ~/repos/dotfiles
+cd ~/repos/dotfiles
 
-# Install Ansible (if not already installed)
-sudo apt update && sudo apt install -y ansible
+# Install minimal Ansible dependencies (ansible, make, git, python3-apt, etc.)
+./scripts/install_ansible.sh
 
-# Run complete system setup
+# Run complete system setup via Makefile or ansible-playbook
 cd ansible-local
-ansible-playbook main.yml --ask-become-pass
+make configure
+# Or directly:
+ansible-playbook playbooks/configure.yml
 
-# Or run specific roles with tags
-ansible-playbook main.yml --tags "setup_docker,setup_python" --ask-become-pass
-
-# Copy dotfiles to your home directory
-cp files/.bash_aliases ~/
-cp files/.vimrc ~/
-cp files/.tmux.conf ~/
-source ~/.bashrc
+# Run specific roles using Makefile targets or tags
+make configure_docker
+make configure_python
+make configure_dotfiles
+# Or with tags:
+ansible-playbook playbooks/configure.yml --tags "docker,python"
 ```
 
 ## 📁 Directory Structure
 
 ```
 dotfiles/
-├── ansible-local/          # Ansible automation playbooks
-│   ├── main.yml           # Master playbook with all roles
-│   ├── ansible.cfg        # Ansible configuration
-│   ├── Makefile          # Quick commands for common tasks
-│   ├── roles/            # Modular role definitions
-│   │   ├── common/       # Basic system setup
-│   │   ├── docker/       # Docker & Docker Compose
-│   │   ├── python/       # Python 3.10+ environment
-│   │   ├── golang/       # Go development setup
-│   │   ├── nodejs/       # Node.js via NVM
-│   │   ├── nginx/        # Nginx web server
-│   │   ├── ssh/          # SSH security hardening
-│   │   ├── fail2ban/     # Intrusion prevention
-│   │   ├── users/        # User account management
-│   │   ├── dotfiles/     # Dotfiles deployment
-│   │   ├── virtualization/ # KVM/QEMU setup
-│   │   └── vm-manager/   # VM creation & management
-│   └── scripts/          # Helper scripts
+├── ansible-local/                  # Ansible automation playbooks & roles
+│   ├── playbooks/
+│   │   └── configure.yml           # Master playbook configuring bare-metal/local host
+│   ├── inventory/
+│   │   ├── hosts.yml               # Localhost inventory definition
+│   │   └── created_vms.yml         # Auto-generated inventory of provisioned VMs
+│   ├── group_vars/
+│   │   └── all.yml                 # Global variables
+│   ├── ansible.cfg                 # Ansible configuration
+│   ├── Makefile                    # Convenient targets for configure, uninstall, and VMs
+│   └── roles/                      # Modular role definitions
+│       ├── android-dev/            # Android SDK, cmdline-tools, KVM & USB udev rules
+│       ├── android-studio/         # Android Studio installation
+│       ├── common/                 # Base system packages & apt upgrades
+│       ├── dart-flutter/           # Dart & Flutter SDK via Snap
+│       ├── docker/                 # Docker Engine & Docker Compose
+│       ├── dotfiles/               # Dotfiles (.bashrc, .vimrc, .tmux.conf) & Vundle setup
+│       ├── fail2ban/               # Intrusion prevention
+│       ├── golang/                 # Go development environment
+│       ├── hostname/               # Hostname configuration
+│       ├── latex/                  # TeX Live, latexmk, evince, vprerex
+│       ├── multipass/              # Canonical Multipass setup
+│       ├── nginx/                  # Nginx web server
+│       ├── nodejs/                 # Node.js via NVM
+│       ├── python/                 # Python (Deadsnakes PPA), venv & pip
+│       ├── ssh/                    # SSH security hardening
+│       ├── users/                  # User account management
+│       ├── virtualization/         # KVM/QEMU/libvirt setup
+│       └── vm-manager/             # Cloud-init VM creation, status & lifecycle management
 │
-├── backup-restore/         # System backup solutions
-│   ├── full-system-backup.sh      # Complete system backup
-│   ├── incremental-backup.sh      # Incremental backups
-│   ├── restore-backup.sh          # Restore utility
-│   ├── backup-to-vm-image.sh      # VM-optimized backup
-│   ├── quick-vm-convert.sh        # VM image conversion
-│   └── README.md                  # Detailed documentation
+├── backup-restore/                 # System backup & VM conversion solutions
+│   ├── cleanup-before-backup.sh    # Pre-backup cache & log cleanup
+│   ├── full-system-backup.sh       # Complete system backup
+│   ├── incremental-backup.sh       # Incremental snapshot backups
+│   ├── restore-backup.sh           # Interactive & CLI restore utility
+│   ├── backup-to-vm-image.sh       # Bootable VM disk image creator
+│   ├── backup-to-data-disk.sh      # Non-bootable VM data disk creator
+│   └── README.md                   # Detailed backup & VM documentation
 │
-├── files/                  # Dotfiles and configurations
-│   ├── .bash_aliases      # 100+ useful aliases & functions
-│   ├── .vimrc            # Vim configuration with plugins
-│   ├── .vimrc-v2         # Alternative Vim config
-│   ├── .tmux.conf        # Tmux configuration
-│   ├── .inputrc          # Readline configuration
-│   └── .cleanup.sh       # System cleanup script
+├── files/                          # Dotfiles and configurations
+│   ├── .bash_aliases               # Curated shell aliases & functions
+│   ├── .vimrc                      # Vim configuration with Vundle plugins
+│   ├── .tmux.conf                  # Tmux configuration
+│   └── .inputrc                    # Readline configuration
 │
-└── scripts/               # Standalone utility scripts
-    ├── install_ollam.sh           # Ollama AI installation
-    ├── debug_ollama_intel.sh      # Intel GPU debugging
-    ├── test_ollama_gpu.sh         # GPU capability testing
-    ├── install_cloudinit.sh       # Cloud-init setup
-    ├── install_latex.sh           # LaTeX environment
-    ├── vim_ide.sh                 # Vim IDE setup
-    ├── openalpr_install.sh        # OpenALPR (ANPR) setup
-    ├── make-certs-nginx.sh        # SSL certificate generation
-    └── ssh-agent.sh               # SSH agent helper
+└── scripts/                        # Standalone bootstrap & utility scripts
+    ├── install_ansible.sh          # Installs Ansible, make, and minimal prerequisites
+    ├── install_latex.sh            # Standalone LaTeX installation script
+    └── .cleanup.sh                 # System cleanup utility (--dry-run / --yes)
 ```
 
 ## 🤖 Ansible Automation
 
-### Available Roles
+### Available Roles in `playbooks/configure.yml`
 
-| Role | Description | Tag |
-|------|-------------|-----|
-| **virtualization** | KVM/QEMU/libvirt setup | `setup_virtualization` |
-| **vm-manager** | VM creation with cloud-init | `create_vm` |
-| **docker** | Docker & Docker Compose | `setup_docker` |
-| **python** | Python 3.10+ with pip | `setup_python` |
-| **golang** | Go development environment | `setup_golang` |
-| **nodejs** | Node.js via NVM | `setup_nodejs_dotfiles` |
-| **nginx** | Nginx web server | `setup_nginx` |
-| **ssh** | SSH security hardening | `setup_ssh` |
-| **fail2ban** | Intrusion prevention | `setup_fail2ban` |
-| **users** | User account management | `setup_users` |
-| **dotfiles** | Deploy dotfiles | `setup_dotfiles` |
-| **common** | Basic system packages | `setup_common` |
+| Role | Description | Tag | Makefile Install Target | Makefile Uninstall Target |
+|------|-------------|-----|-------------------------|---------------------------|
+| **common** | Base system packages & apt upgrade | `common` | `make configure_update_upgrade` | — |
+| **docker** | Docker & Docker Compose | `docker` | `make configure_docker` | `make uninstall_docker` |
+| **nodejs** | Node.js via NVM | `nodejs` | `make configure_nodejs` | `make uninstall_nodejs` |
+| **python** | Python 3.12+ with venv & pip | `python` | `make configure_python` | `make uninstall_python` |
+| **dotfiles** | Deploy dotfiles & Vim plugins | `dotfiles` | `make configure_dotfiles` | `make uninstall_dotfiles` |
+| **virtualization** | KVM/QEMU/libvirt setup | `virtualization` | `make configure_virtualization` | — |
+| **vm-manager** | VM manager setup & VM creation | `vm-manager`, `create-vm` | `make configure_vm_manager`, `make create_vm` | `make clean`, `make clean_all` |
+| **android-dev** | Android SDK, Java 17, KVM & udev rules | `android-dev` | `make configure_android_dev` | `make uninstall_android_dev` |
+| **android-studio** | Android Studio IDE | `android-studio` | `make configure_android_studio` | `make uninstall_android_studio` |
+| **dart-flutter** | Dart & Flutter SDK via Snap | `dart-flutter` | `make configure_dart_flutter` | `make uninstall_dart_flutter` |
+| **latex** | LaTeX (`texlive-base`, `latexmk`, `evince`) | `latex` | `make configure_latex` | `make uninstall_latex` |
+
+*(Additional standalone roles available in `ansible-local/roles/`: `golang`, `nginx`, `ssh`, `fail2ban`, `users`, `hostname`, `multipass`.)*
 
 ### Running Playbooks
 
 ```bash
 cd ansible-local
 
-# Run all playbooks (full system setup)
-ansible-playbook main.yml --ask-become-pass
+# View all available Makefile commands
+make help
 
-# Run specific roles by tag
-ansible-playbook main.yml --tags setup_docker --ask-become-pass
-ansible-playbook main.yml --tags "setup_python,setup_nodejs_dotfiles" --ask-become-pass
+# Run full system setup
+make configure
+# Or directly with ansible-playbook:
+ansible-playbook playbooks/configure.yml
 
-# Create a VM
-ansible-playbook main.yml --tags create_vm --ask-become-pass
+# Run specific roles via Makefile shortcuts
+make configure_docker
+make configure_python
+make configure_nodejs
+make configure_dotfiles
+make configure_android_dev
+make configure_android_studio
+make configure_dart_flutter
+make configure_latex
+make configure_virtualization
+make configure_vm_manager
 
-# Setup virtualization environment
-ansible-playbook main.yml --tags setup_virtualization --ask-become-pass
+# Or run specific roles by tag
+ansible-playbook playbooks/configure.yml --tags "docker,python,latex"
 
-# Use Makefile shortcuts
-make setup          # Run full setup
-make setup-docker   # Setup Docker only
-make setup-python   # Setup Python only
+# Uninstall specific components
+make uninstall_nodejs
+make uninstall_python
+make uninstall_dotfiles
+make uninstall_docker
+make uninstall_android_dev
+make uninstall_android_studio
+make uninstall_dart_flutter
+make uninstall_latex
+
+# VM lifecycle management
+make create_vm                          # Create default VM (hal9000)
+make create_vm VM_NAME=my-server        # Create named VM
+make vm_status                          # Check VM status
+make workspace                          # Show VM workspace overview
+make clean VM_NAME=my-server            # Clean up a specific VM
+make clean_all                          # Remove all VM images and workspace
 ```
 
 ### Customizing Variables
 
-Edit `ansible-local/group_vars/all.yml` or `ansible-local/host_vars/localhost.yml`:
+Edit `ansible-local/group_vars/all.yml` or role defaults in `ansible-local/roles/<role>/defaults/main.yml`:
 
 ```yaml
 # Example custom variables
@@ -170,38 +198,25 @@ vm_ram: 4096
 vm_vcpus: 2
 vm_disk_size: 20G
 
-python_version: "3.11"
-docker_users:
-  - ubuntu
-  - myuser
-
-nginx_server_name: example.com
+python_version: "3.12"
 ```
 
 ## ⚙️ Configuration Files
 
 ### Vim Configuration
 
-**Features:**
-- Syntax highlighting and auto-indentation
-- Plugin manager ready (Vundle/Pathogen)
-- Included plugins:
-  - `emmet-vim` - HTML/CSS shortcuts
-  - `editorconfig-vim` - EditorConfig support
-  - `vimtex` - LaTeX integration
-  - `vim-latex-live-preview` - Live LaTeX preview
-  - `vim-airline` - Status bar
-  - `syntastic` - Syntax checking
-  - `vim-gitgutter` - Git diff in gutter
+Installed via the `dotfiles` Ansible role (`make configure_dotfiles`) or manually via `files/.vimrc`:
+- Syntax highlighting, line numbers, relative numbering, and auto-indentation
+- Vundle plugin manager (`~/.vim/bundle/Vundle.vim`)
+- Included plugins: `nerdtree`, `vim-airline`, `vim-fugitive`, `vim-gitgutter`, `fzf`, `fzf.vim`, `ale`, `vim-surround`, `vim-commentary`, `editorconfig-vim`, `vimtex`
 
-**Installation:**
 ```bash
-# Use the automated script
-./scripts/vim_ide.sh
+# Automated setup (copies dotfiles, clones Vundle, and installs plugins)
+cd ansible-local && make configure_dotfiles
 
 # Or manually
 cp files/.vimrc ~/
-vim +PluginInstall +qall  # If using Vundle
+vim +PluginInstall +qall
 ```
 
 ### Tmux Configuration
@@ -219,103 +234,68 @@ tmux source-file ~/.tmux.conf
 - **Git workflows**: `commit_repo`, `commit_reset`
 - **Docker management**: `docker_nuke`
 - **System monitoring**: `gpu-info`, `hardware_summary`, `disk_analyzer`
-- **Performance testing**: `bench_http`, `speed-test`
 - **File searching**: `largest-files`, `find_files_larger_than`
-- **GPU monitoring**: `gpu-temp`, `gpu-summary`, `ollama-gpu`
-- **Development tools**: `serve`, `mkd-preview`
 
 ```bash
 cp files/.bash_aliases ~/
 source ~/.bash_aliases
 ```
 
-## 🛠 Utility Scripts
-
-### AI & Machine Learning
-
-**Ollama AI Setup**
-```bash
-# Install Ollama with Intel GPU optimization
-./scripts/install_ollam.sh
-
-# Debug Intel GPU for Ollama
-./scripts/debug_ollama_intel.sh
-
-# Test GPU acceleration
-./scripts/test_ollama_gpu.sh
-
-# Run optimized Ollama models
-ollama-gpu run phi3:mini
-test-llama  # Alias for llama3.2:3b
-```
-
-**ANPR/ALPR System**
-```bash
-# Install OpenALPR for license plate recognition
-./scripts/openalpr_install.sh       # User install
-./scripts/openalpr_root-install.sh  # System-wide install
-```
-
-### Cloud & Virtualization
-
-**Cloud-Init Setup**
-```bash
-./scripts/install_cloudinit.sh
-```
-
 **VM Management** (via Ansible)
 ```bash
 cd ansible-local
-ansible-playbook main.yml --tags create_vm -e "vm_name=my-server vm_ram=4096"
+make create_vm VM_NAME=my-server
+# Or with custom parameters:
+ansible-playbook playbooks/configure.yml --tags create-vm -e "vm_name=my-server vm_ram=4096"
 ```
 
-### Development Tools
+## 🛠️ Utility Scripts
 
-**LaTeX Environment**
-```bash
-./scripts/install_latex.sh
-```
+Located in `scripts/`:
+- **[`install_ansible.sh`](scripts/install_ansible.sh)**: Installs minimal prerequisites (`ansible`, `make`, `git`, `python3-apt`, `python3-pip`, `software-properties-common`, `curl`, `gnupg`, `openssh-client`) so `ansible-local` playbooks and `Makefile` targets work out of the box.
+- **[`install_latex.sh`](scripts/install_latex.sh)**: Standalone script to install TeX Live (`texlive-base`, `texlive-lang-english`), `latexmk`, `evince`, and `vprerex` (also integrated as the `latex` Ansible role via `make configure_latex`).
+- **[`.cleanup.sh`](scripts/.cleanup.sh)**: System cleanup script supporting `--dry-run` (preview mode) and `--yes` (non-interactive execution) to clean APT caches, Snap/Docker/user caches, logs, and temporary files.
 
-**Nginx SSL Certificates**
-```bash
-./scripts/make-certs-nginx.sh
-```
-
-**SSH Agent Setup**
-```bash
-./scripts/ssh-agent.sh
-```
 
 ## 💾 System Backup & Restore
 
-Comprehensive backup solution based on Ubuntu's official documentation.
+Comprehensive backup and VM image conversion suite based on Ubuntu's official documentation.
 
 ### Quick Start
 
 ```bash
 cd backup-restore
 
+# Clean caches, temporary files, and old logs before backing up
+sudo ./cleanup-before-backup.sh
+
 # Create full system backup
 sudo ./full-system-backup.sh
 
-# Create incremental backup
+# Create incremental backup (snapshot-based)
 sudo ./incremental-backup.sh
 
 # List available backups
 sudo ./restore-backup.sh --list
 
 # Restore a file to test location
-sudo ./restore-backup.sh --restore-file /mnt/backup/hostname-Monday.tar.gz /etc/fstab /tmp
+sudo ./restore-backup.sh --restore-file /mnt/backup/hostname-Monday-2026-11-10_02-00-00.tar.gz /etc/fstab /tmp
+
+# Convert a backup archive into a bootable VM disk image (.img)
+sudo ./backup-to-vm-image.sh
+
+# Convert a backup archive into a non-bootable VM data disk (-data.img)
+sudo ./backup-to-data-disk.sh
 ```
 
-### Features
+### Scripts & Features
 
-- **Full System Backup**: Complete backup of `/home`, `/etc`, `/var`, `/root`, `/boot`, `/opt`, `/usr/local`
-- **Incremental Backup**: Only backup changed files
-- **Automated Rotation**: 7-day backup retention
-- **Interactive Restore**: Safe restoration with testing capabilities
-- **VM-Optimized Backup**: Special backup for virtual machines
-- **Progress Indication**: Real-time backup status
+- **[`cleanup-before-backup.sh`](backup-restore/cleanup-before-backup.sh)** (and [`scripts/.cleanup.sh`](scripts/.cleanup.sh) with `--dry-run` / `--yes`): Purges APT cache, user/system caches, thumbnails, Trash, `/tmp`, old `/var/log` files, and vacuums `journalctl` before backing up
+- **[`full-system-backup.sh`](backup-restore/full-system-backup.sh)**: Complete `.tar.gz` backup of `/home`, `/etc`, `/var`, `/root`, `/boot`, `/opt`, `/usr/local`, `/srv` with 7-day automatic retention
+- **[`incremental-backup.sh`](backup-restore/incremental-backup.sh)**: Uses GNU `tar` listed-incremental snapshots (`.snar`) to back up only changed files after an initial full baseline
+- **[`restore-backup.sh`](backup-restore/restore-backup.sh)**: Interactive and CLI restoration (`--list`, `--contents`, `--restore-file`, `--restore-full`)
+- **[`backup-to-vm-image.sh`](backup-restore/backup-to-vm-image.sh)**: Converts a `.tar.gz` backup into a bootable raw VM image with `parted`, `ext4`, generated `/etc/fstab`, and `chroot` GRUB installation (ready for QEMU/KVM `.qcow2` or VirtualBox `.vdi`)
+- **[`backup-to-data-disk.sh`](backup-restore/backup-to-data-disk.sh)**: Converts a `.tar.gz` backup into a non-bootable `ext4` data disk image (`-data.img`) for mounting via loop device or attaching as a secondary VM disk (`-hdb`)
 
 ### Automation with Cron
 
@@ -331,7 +311,7 @@ sudo crontab -e
 0 2 * * 1-6 /home/ubuntu/repos/dotfiles/backup-restore/incremental-backup.sh
 ```
 
-See [backup-restore/README.md](backup-restore/README.md) for detailed documentation.
+See [backup-restore/README.md](backup-restore/README.md) for detailed documentation and QEMU/KVM & VirtualBox usage instructions.
 
 ## 🔍 Shell Aliases & Functions
 
@@ -351,8 +331,10 @@ cpu-info           # CPU details
 largest-files      # Top 10 largest files
 largest-dirs       # Top 10 largest directories
 disk_analyzer      # Interactive disk analysis (ncdu)
-find_files_larger_than 100M  # Find files larger than 100MB
-cleanup            # System cleanup script
+find-large         # Find files larger than 100MB
+cleanup            # System cleanup dry-run preview (--dry-run)
+cleanup-real       # Execute system cleanup (--yes)
+cleanup_system     # Dry-run preview followed by [y/N] confirmation
 ```
 
 ### Docker Shortcuts
@@ -369,38 +351,24 @@ commit_reset "message"    # Reset commit history
 sshkey                    # Display SSH public key
 ```
 
-### GPU & AI Tools
+### GPU Tools
 
 ```bash
 gpu-monitor        # Real-time GPU monitoring
 gpu-temp          # GPU temperature
-ollama-debug      # Debug Ollama AI
-ollama-gpu        # Run Ollama with GPU optimization
-test-phi3         # Test Phi3 model
-test-llama        # Test Llama model
+       # Test Llama model
 ```
 
-### Network & Performance
 
-```bash
-speed-test        # Internet speed test
-bench_http        # HTTP benchmarking tool
-serve             # Serve static files (npx serve)
-```
 
 ## 📦 Installation
 
 ### Prerequisites
 
+Run the bootstrap script to install Ansible, `make`, `git`, `python3-apt`, and minimal prerequisites:
+
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
-
-# Install Ansible
-sudo apt install -y ansible git
-
-# Install Python pip (if needed)
-sudo apt install -y python3-pip
+./scripts/install_ansible.sh
 ```
 
 ### Full Installation
@@ -410,15 +378,12 @@ sudo apt install -y python3-pip
 git clone https://github.com/micrometre/dotfiles.git ~/repos/dotfiles
 cd ~/repos/dotfiles
 
-# 2. Run Ansible playbooks
-cd ansible-local
-ansible-playbook main.yml --ask-become-pass
+# 2. Install minimal Ansible prerequisites
+./scripts/install_ansible.sh
 
-# 3. Copy dotfiles
-cp files/.bash_aliases ~/
-cp files/.vimrc ~/
-cp files/.tmux.conf ~/
-cp files/.inputrc ~/
+# 3. Run Ansible playbooks (includes dotfiles & Vundle installation)
+cd ansible-local
+make configure
 
 # 4. Reload shell configuration
 source ~/.bashrc
@@ -429,53 +394,52 @@ source ~/.bashrc
 ```bash
 # Install only Docker and Python
 cd ansible-local
-ansible-playbook main.yml --tags "setup_docker,setup_python" --ask-become-pass
+ansible-playbook playbooks/configure.yml --tags "docker,python"
 
-# Copy only bash aliases
-cp files/.bash_aliases ~/
-source ~/.bash_aliases
+# Install dotfiles and Vim plugins via Ansible
+make configure_dotfiles
 
-# Setup Vim IDE only
-./scripts/vim_ide.sh
+# Install LaTeX environment via Ansible (or standalone ./scripts/install_latex.sh)
+make configure_latex
+
+# Install Android development & Flutter environment
+make configure_android_dev
+make configure_android_studio
+make configure_dart_flutter
 ```
 
 ## 📖 Usage Examples
 
-### Setting Up a Development Server
+### Setting Up a Development Workstation
 
 ```bash
-# Full stack development server with Docker, Python, Node.js, and Nginx
+# Configure Docker, Python, Node.js, and Dotfiles
 cd ansible-local
-ansible-playbook main.yml --tags "setup_docker,setup_python,setup_nodejs_dotfiles,setup_nginx" --ask-become-pass
+ansible-playbook playbooks/configure.yml --tags "docker,python,nodejs,dotfiles"
 ```
 
 ### Creating a KVM Virtual Machine
 
 ```bash
-# Setup virtualization
+# Setup virtualization and VM manager
 cd ansible-local
-ansible-playbook main.yml --tags setup_virtualization --ask-become-pass
+make configure_virtualization
+make configure_vm_manager
 
-# Create VM with static IP
-ansible-playbook main.yml --tags create_vm --ask-become-pass \
+# Create a default VM (hal9000) or specify a custom name
+make create_vm VM_NAME=web-server
+
+# Or customize RAM, vCPUs, and static IP via ansible-playbook
+ansible-playbook playbooks/configure.yml --tags create-vm \
   -e "vm_name=web-server" \
   -e "vm_ram=4096" \
   -e "vm_vcpus=2" \
   -e "vm_ip_config.mode=static" \
   -e "vm_ip_config.static_ip=192.168.122.100"
-```
 
-### Setting Up AI Development Environment
-
-```bash
-# Install Ollama with Intel GPU support
-./scripts/install_ollam.sh
-
-# Test GPU acceleration
-./scripts/test_ollama_gpu.sh
-
-# Run models with GPU optimization
-ollama-gpu run llama3.2:3b
+# Check VM status and workspace overview
+make vm_status
+make workspace
 ```
 
 ### Automated System Backup
@@ -488,13 +452,6 @@ sudo crontab -e
 0 2 * * * /home/ubuntu/repos/dotfiles/backup-restore/full-system-backup.sh
 ```
 
-### Hardening SSH Security
-
-```bash
-cd ansible-local
-ansible-playbook main.yml --tags "setup_ssh,setup_fail2ban" --ask-become-pass
-```
-
 ## 📋 Requirements
 
 ### System Requirements
@@ -504,8 +461,9 @@ ansible-playbook main.yml --tags "setup_ssh,setup_fail2ban" --ask-become-pass
 - **Disk**: 20GB free space minimum
 
 ### Software Dependencies
-- **Ansible**: 2.9+
-- **Python**: 3.8+
+- **Ansible**: 2.9+ (installed via `./scripts/install_ansible.sh`)
+- **Make**: GNU Make
+- **Python**: 3.8+ (`python3-apt`, `python3-pip`)
 - **Bash**: 4.0+
 - **Git**: 2.0+
 
@@ -513,36 +471,8 @@ ansible-playbook main.yml --tags "setup_ssh,setup_fail2ban" --ask-become-pass
 - **Docker**: For containerization roles
 - **KVM/QEMU**: For virtualization roles
 - **Nginx**: For web server roles
-- **Intel GPU drivers**: For Ollama AI acceleration
 
-## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for:
-
-- Bug fixes
-- New roles or scripts
-- Documentation improvements
-- Feature requests
-
-### Development Setup
-
-```bash
-# Fork and clone
-git clone https://github.com/YOUR_USERNAME/dotfiles.git
-cd dotfiles
-
-# Create feature branch
-git checkout -b feature/my-new-feature
-
-# Make changes and test
-cd ansible-local
-ansible-playbook main.yml --check --diff
-
-# Commit and push
-git add .
-git commit -m "Add new feature"
-git push origin feature/my-new-feature
-```
 
 ## 📄 License
 

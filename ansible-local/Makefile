@@ -1,4 +1,4 @@
-.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_android_studio configure_dart_flutter uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_android_studio uninstall_dart_flutter ssh-agent create_vm vm_status workspace clean clean_all
+.PHONY: help provision update-inventory configure configure_nodejs configure_python configure_dotfiles configure_docker configure_virtualization configure_vm_manager configure_android_dev configure_android_studio configure_dart_flutter configure_latex uninstall_nodejs uninstall_python uninstall_dotfiles uninstall_docker uninstall_android_dev uninstall_android_studio uninstall_dart_flutter uninstall_latex ssh-agent create_vm vm_status workspace clean clean_all
 
 help:
 	@echo "Ansible Infrastructure Management"
@@ -11,6 +11,7 @@ help:
 	@echo "  configure_android_dev  - Configure Android development environment"
 	@echo "  configure_android_studio - Install Android Studio"
 	@echo "  configure_dart_flutter - Configure Dart/Flutter via snap"
+	@echo "  configure_latex        - Install LaTeX packages"
 	@echo "  configure_docker       - Configure Docker"
 	@echo "  configure_virtualization - Configure virtualization support"
 	@echo "  configure_vm_manager   - Configure VM manager"
@@ -26,6 +27,7 @@ help:
 	@echo "  uninstall_android_dev  - Remove Android development environment"
 	@echo "  uninstall_android_studio - Remove Android Studio"
 	@echo "  uninstall_dart_flutter - Remove Dart and Flutter snaps"
+	@echo "  uninstall_latex        - Remove LaTeX packages"
 	@echo "  ssh_agent              - Start SSH agent and add SSH key"
 
 
@@ -120,6 +122,12 @@ configure_dart_flutter:
 	@echo ""
 	@echo "✅ ${HOST_NAME} configured with Dart/Flutter!"
 
+configure_latex:
+	@echo "Configuring LaTeX on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags latex
+	@echo ""
+	@echo "✅ ${HOST_NAME} configured with LaTeX!"
+
 uninstall_nodejs:
 	@echo "Uninstalling Node.js/NVM on ${HOST_NAME}..."
 	ansible-playbook playbooks/configure.yml --tags nodejs -e nodejs_uninstall=true
@@ -161,6 +169,12 @@ uninstall_dart_flutter:
 	ansible-playbook playbooks/configure.yml --tags dart-flutter -e flutter_uninstall=true
 	@echo ""
 	@echo "✅ ${HOST_NAME} removed Dart/Flutter!"
+
+uninstall_latex:
+	@echo "Removing LaTeX on ${HOST_NAME}..."
+	ansible-playbook playbooks/configure.yml --tags latex -e latex_uninstall=true
+	@echo ""
+	@echo "✅ ${HOST_NAME} removed LaTeX!"
 
 
 

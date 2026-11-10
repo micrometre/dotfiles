@@ -1,0 +1,10 @@
+---
+# tasks file for latex
+- name: "{{ 'Uninstall' if (latex_uninstall | bool) else 'Install' }} LaTeX packages"
+  apt:
+    name: "{{ latex_packages }}"
+    state: "{{ 'absent' if (latex_uninstall | bool) else 'present' }}"
+    update_cache: "{{ not (latex_uninstall | bool) }}"
+    autoremove: "{{ latex_uninstall | bool }}"
+  environment:
+    DEBIAN_FRONTEND: noninteractive

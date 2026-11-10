@@ -20,6 +20,7 @@
     - { role: android-dev, tags: ["android-dev", "setup"], become: false }
     - { role: android-studio, tags: ["android-studio", "setup"], become: false }
     - { role: dart-flutter, tags: ["dart-flutter", "setup"], become: false }
+    - { role: latex, tags: ["latex", "setup"] }
     - {role: vm-manager, tags: ["create-vm", "setup"], become: false}
   
   post_tasks:
@@ -35,7 +36,3 @@
           Python: {{ ansible_facts.python_version }}
           ========================================
           
-          Next steps:
-          - Add more roles to this playbook as needed
-          - Run 'make deploy' when ready to deploy the application
-          ========================================

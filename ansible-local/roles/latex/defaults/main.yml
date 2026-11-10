@@ -1,0 +1,10 @@
+---
+latex_uninstall: false
+
+# LaTeX packages to install
+latex_packages:
+  - vprerex
+  - evince
+  - latexmk
+  - texlive-lang-english
+  - texlive-base

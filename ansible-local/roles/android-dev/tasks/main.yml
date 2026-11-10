@@ -156,6 +156,16 @@
         state: present
       loop: "{{ android_profile_build_tools }}"
 
+    - name: Ensure adbusers and plugdev groups exist
+      group:
+        name: "{{ item }}"
+        system: true
+        state: present
+      loop:
+        - adbusers
+        - plugdev
+      become: true
+
     - name: Copy USB debugging udev rules
       copy:
         src: 51-android.rules
@@ -164,10 +174,12 @@
       become: true
       notify: reload udev
 
-    - name: Add user to plugdev group
+    - name: Add user to adbusers and plugdev groups
       user:
         name: "{{ configure_user | default(ansible_user) }}"
-        groups: plugdev
+        groups:
+          - adbusers
+          - plugdev
         append: true
       become: true
       ignore_errors: true
